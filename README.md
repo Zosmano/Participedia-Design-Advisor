@@ -18,6 +18,7 @@ The companion [Participedia Global Research Interactive Dashboard](#companion-po
 - **Context.** Countries that document impact more or less often than their cases' design and documentation predict, and how participation has changed since 1990 (deliberative share, online and hybrid formats, evaluation, documented impact).
 - **The evidence gap.** Who evaluates and who doesn't, by method, organizer and funder, with four recommendations for funders and commissioners.
 - **New on Participedia.** The 356 published cases not in the capstone dataset, scored by the same model, with the shift in method mix.
+- **Story films.** Three short animated films in three acts (the question, the evidence, the design), with synthesized sound and a narrator: the evaluation lever nobody pulls, how power goes with impact, and the lever that travels across political contexts. Panels rise in, figures count up and charts draw themselves as each tab opens, unless the viewer's system asks for reduced motion.
 
 ## Visual tour
 
