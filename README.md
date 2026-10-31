@@ -2,9 +2,10 @@
 
 **Before you convene a citizens' assembly, a participatory budget or a community workshop: which design choices have gone with documented impact, what do the closest past cases tell you, and how will you show it worked?**
 
-The companion [Participedia Global Research Interactive Dashboard](https://app.powerbi.com/view?r=eyJrIjoiZmFlMDhlMTEtOWE3NC00ZTRhLWFjNjEtZGY2ZGRiOGVkMGVlIiwidCI6ImM3ZTc5YjlkLWVjZTktNDEzMy04NzQzLWI2Y2FkMjZjNTc0ZiIsImMiOjEwfQ%3D%3D) (Power BI) shows *where* participatory processes happen and in what national context. This microproduct turns the same archive into decisions. It learns from 2,260 Participedia cases in 124 countries (the ALY6980 capstone dataset), adds the 356 cases published since then on [participedia.net](https://participedia.net), and gives organizers, funders and public bodies:
+The companion [Participedia Global Research Interactive Dashboard](#companion-power-bi-dashboard) (Power BI, included in this repository) shows *where* participatory processes happen and in what national context. This microproduct turns the same archive into decisions. It learns from 2,260 Participedia cases in 124 countries (the ALY6980 capstone dataset), adds the 356 cases published since then on [participedia.net](https://participedia.net), and gives organizers, funders and public bodies:
 
 [![Live advisor](https://img.shields.io/badge/Open_the_advisor-2B1B3D?style=for-the-badge)](https://zosmano.github.io/Participedia-Design-Advisor/docs/)
+[![Power BI](https://img.shields.io/badge/Power_BI-Live_Dashboard-F2C811?style=for-the-badge&logo=powerbi&logoColor=black)](https://app.powerbi.com/view?r=eyJrIjoiZmFlMDhlMTEtOWE3NC00ZTRhLWFjNjEtZGY2ZGRiOGVkMGVlIiwidCI6ImM3ZTc5YjlkLWVjZTktNDEzMy04NzQzLWI2Y2FkMjZjNTc0ZiIsImMiOjEwfQ%3D%3D)
 [![Python](https://img.shields.io/badge/Python_pipeline-1D7A5F?style=for-the-badge&logo=python&logoColor=white)](#run-it)
 [![Data sources](https://img.shields.io/badge/Data_sources-B8862B?style=for-the-badge)](#data-sources)
 
@@ -36,6 +37,32 @@ The interactive advisor runs in the browser ([live version](https://zosmano.gith
 
 ### New on Participedia
 ![New cases](docs/figures/new_cases.png)
+
+## Companion Power BI dashboard
+
+The **Participedia Global Research Interactive Dashboard** is the descriptive side of this project: where the 2,260 cases happen, in what national context, and by which methods. The advisor builds on it to say which designs work.
+
+[![Power BI](https://img.shields.io/badge/Power_BI-Open_the_live_dashboard-F2C811?style=for-the-badge&logo=powerbi&logoColor=black)](https://app.powerbi.com/view?r=eyJrIjoiZmFlMDhlMTEtOWE3NC00ZTRhLWFjNjEtZGY2ZGRiOGVkMGVlIiwidCI6ImM3ZTc5YjlkLWVjZTktNDEzMy04NzQzLWI2Y2FkMjZjNTc0ZiIsImMiOjEwfQ%3D%3D)
+
+| Page | What it shows |
+|---|---|
+| 1 · Interactive Dashboard | A world map of cases, total countries (125) and cases (2.26K), and a country table with average Gini, Freedom House score and internet access, filtered by country and project start date |
+| 2 · Method & Macro Analysis | Cases by method type and recruitment method, with the average macro indicators and duration for each combination |
+| 3 · Case Details | Each case's title and description, filtered by the selected country and dates |
+
+Built in Power BI Desktop with Power Query cleaning and DAX measures. Custom navigation buttons replace the report tabs, and country and date slicers stay in sync across pages.
+
+![Page 1: Interactive Dashboard](powerbi/screenshots/1_interactive_dashboard.png)
+
+<details><summary>Pages 2 and 3</summary>
+
+![Page 2: Method and Macro Analysis](powerbi/screenshots/2_method_and_macro_analysis.png)
+
+![Page 3: Case Details](powerbi/screenshots/3_case_details.png)
+
+</details>
+
+To open the report yourself, download [`powerbi/Participedia_Global_Research_Dashboard.pbix`](powerbi/Participedia_Global_Research_Dashboard.pbix) (13.9 MB) and open it in [Power BI Desktop](https://www.microsoft.com/power-platform/products/power-bi/desktop) (free, Windows). The data is embedded in the file.
 
 ## Findings
 
