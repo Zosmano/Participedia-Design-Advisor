@@ -5,5 +5,6 @@ __pycache__/
 # Local preview build and model scratch files
 outputs/participation_design_advisor_local.html
 catboost_info/
-# Private: review of a manuscript under journal review
+# Private: review and rerun results for a manuscript under journal review
 docs/paper_alignment_review.md
+outputs/paper_rerun.json
