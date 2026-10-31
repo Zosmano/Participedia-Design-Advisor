@@ -1,0 +1,9 @@
+# Downloaded data (refresh with `python run_all.py --live`)
+data/raw/
+__pycache__/
+*.pyc
+# Local preview build and model scratch files
+outputs/participation_design_advisor_local.html
+catboost_info/
+# Private: review of a manuscript under journal review
+docs/paper_alignment_review.md

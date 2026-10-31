@@ -1,0 +1,545 @@
+<title>Participation Design Advisor</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,600;6..72,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: an assembly hall — a quiet porcelain floor, an aubergine dais (header), emerald for what works, rose for what holds back,
+   gold for the participation spectrum. The advisor is a two-column workbench: the design on the left, the verdict pinned right. */
+:root{
+  --bg:#F3F4F7; --surface:#FFFFFF; --sunk:#E9EBF1; --line:#D7DAE3; --ink:#18172B; --ink2:#4A4A63; --muted:#73748A;
+  --dais:#2B1B3D; --dais2:#3D2A55; --on-dais:#F4EEF9; --on-dais2:#C9BBDA;
+  --emerald:#1D7A5F; --emerald-soft:#DCEFE7; --rose:#B4475A; --rose-soft:#F6E2E6; --gold:#B8862B; --gold-soft:#F4EAD3; --plum:#6B4A8C;
+  --focus:#6B4A8C;
+  --f-display:"Newsreader",Georgia,"Times New Roman",serif; --f-body:"Public Sans","Segoe UI",system-ui,sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  --r:12px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#13121C; --surface:#1C1B28; --sunk:#252434; --line:#33324A; --ink:#ECEAF4; --ink2:#C2C0D4; --muted:#9897AE;
+  --dais:#1F1430; --dais2:#2C1F42; --on-dais:#F1EAF8; --on-dais2:#B9A9CC;
+  --emerald:#4FBF97; --emerald-soft:#173A2F; --rose:#E27A8C; --rose-soft:#3D1E26; --gold:#E0B05A; --gold-soft:#3A2E17; --plum:#B596D6; --focus:#B596D6; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#13121C; --surface:#1C1B28; --sunk:#252434; --line:#33324A; --ink:#ECEAF4; --ink2:#C2C0D4; --muted:#9897AE;
+  --dais:#1F1430; --dais2:#2C1F42; --on-dais:#F1EAF8; --on-dais2:#B9A9CC;
+  --emerald:#4FBF97; --emerald-soft:#173A2F; --rose:#E27A8C; --rose-soft:#3D1E26; --gold:#E0B05A; --gold-soft:#3A2E17; --plum:#B596D6; --focus:#B596D6; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-body);margin:0}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;font-weight:600;letter-spacing:-.01em}
+h2{font-size:30px;line-height:1.15}h3{font-size:19px}
+a{color:var(--plum)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:6px}
+.mono,.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+/* dais */
+header{background:radial-gradient(1200px 400px at 85% -40%,var(--dais2),transparent),var(--dais);color:var(--on-dais)}
+header .wrap{padding-block:34px 26px;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:28px;align-items:end}
+.eyebrow{font:600 12px/1 var(--f-body);letter-spacing:.14em;text-transform:uppercase;color:var(--on-dais2)}
+header h1{font-size:clamp(34px,4.6vw,56px);line-height:1.02;margin-top:12px;font-weight:600}
+header h1 em{font-style:italic;color:var(--gold)}
+header p{max-width:62ch;color:var(--on-dais2);margin:14px 0 0}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.fact{border-top:1px solid #ffffff2e;padding-top:10px}
+.fact b{display:block;font:600 26px/1.1 var(--f-display);color:var(--on-dais)}
+.fact span{font-size:12px;color:var(--on-dais2)}
+nav.tabs{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+nav.tabs .wrap{display:flex;gap:4px;overflow-x:auto;scrollbar-width:thin}
+nav.tabs a{padding:14px 14px 12px;text-decoration:none;color:var(--ink2);font-weight:600;font-size:14px;border-bottom:3px solid transparent;white-space:nowrap}
+nav.tabs a[aria-current="page"]{color:var(--ink);border-color:var(--gold)}
+main .wrap{padding-block:26px 50px}
+section[hidden]{display:none}
+.lead{color:var(--ink2);max-width:72ch;margin:8px 0 22px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.grid{display:grid;gap:16px}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:900px){.g2,.g3,.g4,header .wrap{grid-template-columns:1fr}}
+.note{color:var(--muted);font-size:13px}
+.tile .k{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.tile .v{font:600 34px/1.1 var(--f-display);margin-top:6px}
+.tile .n{font-size:13px;color:var(--ink2);margin-top:4px}
+/* advisor */
+.bench{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:980px){.bench{grid-template-columns:1fr}}
+.verdict{position:sticky;top:calc(env(safe-area-inset-top,0px) + 62px)}
+@media (max-width:980px){.verdict{position:static}}
+.step{margin-bottom:14px}
+.step>h3{display:flex;gap:10px;align-items:baseline}
+.step>h3 small{font:500 12px var(--f-body);color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px 14px;margin-top:10px}
+label.f{display:grid;gap:4px;font-size:13px;color:var(--ink2);font-weight:600}
+select,input[type=number]{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{font:500 13px var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--ink2);border-radius:999px;padding:6px 11px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.chip .d{font:500 11px var(--f-mono);margin-left:6px;opacity:.75}
+.sub{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-top:12px}
+/* participation spectrum */
+.spectrum{display:grid;grid-template-columns:repeat(5,1fr);margin-top:10px;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+.spectrum button{font:600 13px var(--f-body);padding:12px 6px 10px;border:0;background:var(--sunk);color:var(--ink2);cursor:pointer;position:relative}
+.spectrum button+button{border-left:1px solid var(--line)}
+.spectrum button[aria-pressed="true"]{background:var(--gold-soft);color:var(--ink)}
+.spectrum button[aria-pressed="true"]::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:var(--gold)}
+.spectrum small{display:block;font:400 11px var(--f-body);color:var(--muted);margin-top:2px}
+.toggles{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px}
+.toggles label{display:flex;gap:7px;align-items:center;font-size:14px}
+.gauge{display:flex;gap:18px;align-items:center}
+.gauge svg{flex:none}
+.big{font:600 52px/1 var(--f-display)}
+.cmp{font-size:13px;color:var(--ink2)}
+.moves{display:grid;gap:8px;margin-top:10px}
+.move{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 12px;border-radius:10px;background:var(--sunk)}
+.move b{font-weight:600}.move .why{font-size:12px;color:var(--muted)}
+.move button{font:600 12px var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 10px;cursor:pointer}
+.up{color:var(--emerald)}.down{color:var(--rose)}
+.pill{display:inline-block;font:600 11px/1 var(--f-body);letter-spacing:.04em;padding:5px 8px;border-radius:999px}
+.pill.yes{background:var(--emerald-soft);color:var(--emerald)}.pill.no{background:var(--sunk);color:var(--muted)}
+.case{padding:10px 0;border-top:1px solid var(--line)}
+.case:first-child{border-top:0}
+.case a{font-weight:600;text-decoration:none;color:var(--ink)}.case a:hover{text-decoration:underline}
+.case p{margin:4px 0 0;font-size:13px;color:var(--ink2)}
+.presets{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.presets button{font:600 13px var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:8px 12px;cursor:pointer}
+.presets button[aria-pressed="true"]{border-color:var(--plum);box-shadow:inset 0 -3px 0 var(--plum)}
+/* charts */
+.chart svg{width:100%;height:auto;display:block}
+.chart text{fill:var(--ink2);font:12px var(--f-body)}
+.chart .tick{fill:var(--muted);font:11px var(--f-mono)}
+.chart .gl{stroke:var(--line)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--ink2);margin-top:8px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.seg button{font:600 13px var(--f-body);border:0;background:var(--surface);color:var(--ink2);padding:7px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+table.t{border-collapse:collapse;width:100%;font-size:14px}
+table.t th{font:600 12px var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px;border-bottom:1px solid var(--line)}
+table.t td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+table.t td.r,table.t th.r{text-align:right;font-variant-numeric:tabular-nums}
+.scroll{overflow-x:auto}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.prose p{max-width:72ch}
+.tip{position:fixed;z-index:20;background:var(--ink);color:var(--surface);font-size:12px;padding:8px 10px;border-radius:8px;max-width:280px;pointer-events:none}
+footer{border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+footer .wrap{padding-block:20px 30px}
+@media (prefers-reduced-motion:no-preference){.needle{transition:stroke-dashoffset .6s ease}.fadein{animation:fi .4s ease both}@keyframes fi{from{opacity:.3;transform:translateY(4px)}}}
+</style>
+
+<header><div class="wrap">
+  <div>
+    <div class="eyebrow">Participation Design Advisor · built on Participedia</div>
+    <h1>Design public participation that <em>leaves a mark</em></h1>
+    <p>Before you convene a citizens' assembly, a participatory budget or a community workshop, see which design choices have gone with documented impact in <span id="hCases"></span> real cases from <span id="hCountries"></span> countries, compare yours with the closest of them, and plan the evidence that will show it worked.</p>
+  </div>
+  <div class="facts" id="facts"></div>
+</div></header>
+<nav class="tabs" aria-label="Sections"><div class="wrap">
+  <a href="#advisor" data-tab="advisor">Design advisor</a><a href="#works" data-tab="works">What works</a><a href="#context" data-tab="context">Context</a>
+  <a href="#evidence" data-tab="evidence">The evidence gap</a><a href="#new" data-tab="new">New on Participedia</a><a href="#method" data-tab="method">Method & sources</a>
+</div></nav>
+<main><div class="wrap">
+
+<section id="advisor">
+  <h2>Design advisor</h2>
+  <p class="lead">Describe the process you are planning. The model estimates the chance that a process designed this way documents evidence of impact, assuming it is written up as fully as Participedia's complete entries. It then shows which changes would raise that chance, and the past cases closest to yours.</p>
+  <div class="presets" id="presets" role="group" aria-label="Start from an example"></div>
+  <div class="bench">
+    <form id="design" onsubmit="return false">
+      <div class="card step"><h3>Context <small>where you work</small></h3>
+        <div class="row">
+          <label class="f">Country <select id="country"></select></label>
+          <label class="f">Main issue <select id="issue"></select></label>
+          <label class="f">Scope of influence <select id="scope"></select></label>
+          <label class="f">Purpose <select id="purpose"></select></label>
+        </div>
+        <p class="note" id="ctxNote" style="margin:10px 0 0"></p></div>
+      <div class="card step"><h3>Power <small>how much say participants get</small></h3>
+        <div class="spectrum" id="spectrum" role="group" aria-label="Public participation spectrum"></div>
+        <p class="note" style="margin:8px 0 0">The IAP2 spectrum of public participation, from informing people to placing the final decision in their hands.</p></div>
+      <div class="card step"><h3>People <small>who takes part</small></h3>
+        <div class="row">
+          <label class="f">Who can take part <select id="open_limited"></select></label>
+          <label class="f">How participants are recruited <select id="recruitment_method"></select></label>
+          <label class="f">Number of participants <input type="number" id="participants" min="1" max="10000000" step="1"></label>
+        </div>
+        <div class="sub">Groups you will reach out to</div><div class="chips" id="c_targeted_participants"></div></div>
+      <div class="card step"><h3>Process <small>how they work together</small></h3>
+        <div class="sub">Method</div><div class="chips" id="c_method_types"></div>
+        <div class="sub">How participants interact</div><div class="chips" id="c_participants_interactions"></div>
+        <div class="sub">What participants learn from</div><div class="chips" id="c_learning_resources"></div>
+        <div class="sub">How decisions are reached</div><div class="chips" id="c_decision_methods"></div>
+        <div class="row">
+          <label class="f">Format <select id="facetoface_online_or_both"></select></label>
+          <label class="f">Facilitation <select id="facilitator_training"></select></label>
+          <label class="f">Timing <select id="time_limited"></select></label>
+        </div></div>
+      <div class="card step"><h3>Follow-through <small>who runs it and what happens after</small></h3>
+        <div class="sub">How results are shared</div><div class="chips" id="c_insights_outcomes"></div>
+        <div class="sub">Organized by</div><div class="chips" id="c_organizer_types"></div>
+        <div class="sub">Funded by</div><div class="chips" id="c_funder_types"></div>
+        <div class="toggles">
+          <label><input type="checkbox" id="formal_evaluation"> Formal evaluation planned</label>
+          <label><input type="checkbox" id="staff"> Paid staff</label>
+          <label><input type="checkbox" id="volunteers"> Volunteers</label>
+          <label><input type="checkbox" id="legality"> Legally required</label>
+        </div></div>
+    </form>
+    <aside class="verdict">
+      <div class="card fadein" id="verdict" aria-live="polite"></div>
+      <div class="card" style="margin-top:14px"><h3>Context fit</h3><p class="note" style="margin:4px 0 8px">How common your recruitment method is in countries like yours, by thirds of the archive on each indicator (Zakaria & Carson, Table 8).</p><div id="fit"></div></div>
+      <div class="card" style="margin-top:14px"><h3>Cases closest to yours</h3><p class="note" style="margin:4px 0 6px">Matched on design and context; the outcome is what each entry records.</p><div id="similar"></div></div>
+    </aside>
+  </div>
+</section>
+
+<section id="works" hidden>
+  <h2>What works, on average</h2>
+  <p class="lead">For each design choice, the average change in the chance of documented impact when that choice is switched on rather than off across all cases, holding everything else about them fixed, including how well they are documented. Bars show a 90% interval from 200 refits of the model. These are associations in a crowd-sourced archive, not proof of cause.</p>
+  <div class="bar" style="margin-bottom:12px"><span class="note">Context</span><div class="seg" id="workBand" role="group" aria-label="Political context"></div>
+    <span class="note" style="margin-left:10px">Show</span><div class="seg" id="workField" role="group" aria-label="Design area"></div></div>
+  <div class="card"><div class="chart" id="forest"></div>
+    <div class="legend"><span><i style="background:var(--emerald)"></i>Goes with more documented impact</span><span><i style="background:var(--rose)"></i>Goes with less</span><span><i style="background:var(--muted)"></i>Interval crosses zero</span></div></div>
+</section>
+
+<section id="context" hidden>
+  <h2>Context: where impact gets documented</h2>
+  <p class="lead">Your dashboard shows where cases happen. This view asks a sharper question: in each country, do cases document impact more or less often than their design and documentation would predict? Countries above the line punch above their weight.</p>
+  <div class="grid g2">
+    <div class="card"><h3>Observed vs expected documented impact</h3><p class="note" style="margin:4px 0">Countries with 15 or more cases. Dot size = number of cases.</p><div class="chart" id="gaps"></div></div>
+    <div class="card"><h3>How participation has changed</h3><p class="note" style="margin:4px 0">Share of cases by five-year start period.</p><div class="chart" id="trend"></div>
+      <div class="legend" id="trendLegend"></div></div>
+  </div>
+  <div class="card" style="margin-top:16px"><h3>Countries</h3><div class="scroll"><table class="t" id="ctab"></table></div></div>
+</section>
+
+<section id="evidence" hidden>
+  <h2>The evidence gap</h2>
+  <p class="lead" id="evLead"></p>
+  <div class="grid g4" id="evTiles" style="margin-bottom:16px"></div>
+  <div class="grid g2">
+    <div class="card"><h3>Share of cases formally evaluated, by method</h3><div class="chart" id="evMethod"></div></div>
+    <div class="card"><h3>…by who organizes and who funds</h3><div class="seg" id="evWho" role="group" aria-label="Organizer or funder" style="margin:6px 0 4px"></div><div class="chart" id="evOrg"></div></div>
+  </div>
+  <div class="card" style="margin-top:16px"><h3>What funders and commissioners can do</h3><div class="prose" id="evRecs"></div></div>
+</section>
+
+<section id="new" hidden>
+  <h2>New on Participedia</h2>
+  <p class="lead" id="newLead"></p>
+  <div class="grid g4" id="newTiles" style="margin-bottom:16px"></div>
+  <div class="grid g2" style="margin-bottom:16px">
+    <div class="card"><h3>Method mix: your dataset vs the new cases</h3><div class="chart" id="mix"></div>
+      <div class="legend"><span><i style="background:var(--muted)"></i>Capstone dataset</span><span><i style="background:var(--gold)"></i>Added since</span></div></div>
+    <div class="card"><h3>Reading the new cases</h3><div class="prose" id="newRead"></div></div>
+  </div>
+  <div class="card"><h3>Newest cases, scored</h3><div class="bar" style="margin:6px 0 10px"><input type="search" id="newQ" placeholder="Filter by title or country" aria-label="Filter new cases" style="font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);min-width:240px"></div>
+    <div class="scroll"><table class="t" id="newTab"></table></div></div>
+</section>
+
+<section id="method" hidden><div class="prose" id="mbody"></div></section>
+
+</div></main>
+<footer><div class="wrap">Analysis and design by Osman Zakaria, PMP. A companion to Zakaria, O., &amp; Carson, J., <i>Mapping Civic Engagement Design: A Macro-Micro Hybrid Ensemble Framework for Institutional Governance</i> (manuscript under review), built on the same Participedia dataset of 2,260 cases, with cases added to Participedia since then. Case data © Participedia contributors, used under the <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a> licence; country indicators from the World Bank (Gini index, internet use) and Freedom House (Freedom in the World), as compiled in that dataset. Not an official Participedia product.</div></footer>
+<div class="tip" id="tip" hidden></div>
+
+<script>
+const D = /*__DATA__*/null;
+const $ = s => document.querySelector(s), NS = "http://www.w3.org/2000/svg";
+const el = (t, a = {}, p) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const pct = (v, d = 0) => v == null || isNaN(v) ? "–" : (v * 100).toFixed(d) + "%";
+const pts = v => (v >= 0 ? "+" : "−") + Math.abs(v * 100).toFixed(1) + " pts";
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const tip = $("#tip"), showTip = (e, h) => { tip.innerHTML = h; tip.hidden = false; const r = tip.getBoundingClientRect(); tip.style.left = Math.min(e.clientX + 14, innerWidth - r.width - 8) + "px"; tip.style.top = Math.min(e.clientY + 14, innerHeight - r.height - 8) + "px"; }, hideTip = () => tip.hidden = true;
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const F = D.features, FI = Object.fromEntries(F.map((f, i) => [f.name, i])), MOD = D.model, SC = D.schema;
+const caseUrl = id => id ? `https://participedia.net/case/${id}` : null;
+
+/* ---------------------------------------------------------------- the model, scored in the browser (same numbers as Python) */
+function score(x) { let s = MOD.b0;
+  for (let i = 0; i < x.length; i++) { const v = (x[i] === null || Number.isNaN(x[i])) ? MOD.med[i] : x[i]; s += MOD.coef[i] * (v - MOD.mu[i]) / MOD.sd[i]; }
+  return 1 / (1 + Math.exp(-s)); }
+
+/* ---------------------------------------------------------------- the design being edited */
+const S = { multi: {}, single: {}, bin: {}, country: "Canada", issue: "environment", scope: "city/town", purpose: "make", participants: 100 };
+const CHIP_FIELDS = ["targeted_participants", "method_types", "participants_interactions", "learning_resources", "decision_methods", "insights_outcomes", "organizer_types", "funder_types"];
+const SELECTS = ["open_limited", "recruitment_method", "facetoface_online_or_both", "facilitator_training", "time_limited"];
+const PRESETS = {
+  "Citizens' assembly": { country: "Canada", issue: "environment", scope: "regional", purpose: "make", participants: 100, single: { public_spectrum: "collaborate", open_limited: "limited", recruitment_method: "stratified", facetoface_online_or_both: "facetoface", facilitator_training: "professional", time_limited: "a" },
+    multi: { method_types: ["deliberative"], participants_interactions: ["discussion", "ask"], learning_resources: ["expert", "written"], decision_methods: ["voting"], insights_outcomes: ["public"], organizer_types: ["regional"], funder_types: ["regional"], targeted_participants: [] }, bin: { formal_evaluation: 0, staff: 1, volunteers: 0, legality: 0 } },
+  "Participatory budgeting": { country: "Brazil", issue: "economics", scope: "city/town", purpose: "make", participants: 5000, single: { public_spectrum: "empower", open_limited: "open", recruitment_method: "", facetoface_online_or_both: "both", facilitator_training: "trained", time_limited: "repeated" },
+    multi: { method_types: ["public"], participants_interactions: ["discussion", "express"], learning_resources: ["written"], decision_methods: ["voting"], insights_outcomes: ["public", "public_hearingsmeetings"], organizer_types: ["local"], funder_types: ["local"], targeted_participants: ["lowincome"] }, bin: { formal_evaluation: 0, staff: 1, volunteers: 1, legality: 1 } },
+  "Online consultation": { country: "United Kingdom", issue: "governance", scope: "national", purpose: "make", participants: 2000, single: { public_spectrum: "consult", open_limited: "open", recruitment_method: "", facetoface_online_or_both: "online", facilitator_training: "", time_limited: "a" },
+    multi: { method_types: ["public_meetings"], participants_interactions: ["express"], learning_resources: ["written"], decision_methods: ["opinion"], insights_outcomes: ["new"], organizer_types: ["national"], funder_types: ["national"], targeted_participants: [] }, bin: { formal_evaluation: 0, staff: 1, volunteers: 0, legality: 0 } },
+  "Community planning workshop": { country: "India", issue: "planning", scope: "neighbourhood", purpose: "develop", participants: 60, single: { public_spectrum: "involve", open_limited: "open_to", recruitment_method: "", facetoface_online_or_both: "facetoface", facilitator_training: "trained", time_limited: "repeated" },
+    multi: { method_types: ["community", "planning"], participants_interactions: ["discussion", "storytelling"], learning_resources: ["site", "participant"], decision_methods: ["general"], insights_outcomes: ["word"], organizer_types: ["nongovernmental"], funder_types: ["international"], targeted_participants: ["women", "lowincome"] }, bin: { formal_evaluation: 0, staff: 0, volunteers: 1, legality: 0 } } };
+let preset = "Citizens' assembly";
+function applyPreset(name) { const p = JSON.parse(JSON.stringify(PRESETS[name])); preset = name;
+  Object.assign(S, { country: p.country, issue: p.issue, scope: p.scope, purpose: p.purpose, participants: p.participants, single: p.single, multi: p.multi, bin: p.bin }); syncForm(); update(); }
+
+function vectorFor(st) {                                    // the design -> the model's feature vector, at full documentation
+  const x = F.map(f => f.kind === "doc" ? (D.doc_ref[f.name] ?? D.fill[f.name] ?? NaN) : 0);
+  const on = n => { if (n in FI) x[FI[n]] = 1; };
+  CHIP_FIELDS.forEach(f => (st.multi[f] || []).forEach(c => on(`${f}=${c}`)));
+  on(`general_issues=${st.issue}`); on(`purposes=${st.purpose}`); on(`scope_of_influence=${st.scope}`);
+  ["public_spectrum", ...SELECTS].forEach(f => st.single[f] && on(`${f}=${st.single[f]}`));
+  ["formal_evaluation", "staff", "volunteers", "legality"].forEach(f => x[FI[f]] = st.bin[f] ? 1 : 0);
+  x[FI.facilitators] = st.single.facilitator_training ? 1 : 0;
+  const org = (st.multi.organizer_types || []).join(" "); x[FI.is_government] = /local|regional|national/.test(org) ? 1 : 0;
+  x[FI.log_participants] = st.participants > 0 ? Math.log10(st.participants) : NaN;
+  const c = D.countries[st.country] || {}; x[FI.gini] = c.gini ?? NaN; x[FI.freedom] = c.freedom ?? NaN; x[FI.internet] = c.internet ?? NaN;
+  x[FI.start_year] = 2026;
+  return x;
+}
+const cloneS = () => JSON.parse(JSON.stringify(S));
+/* A change is only suggested when the archive backs it: a genuine design choice (not who funds you, not protest),
+   at least 60 cases with it, and a 90% interval on its average effect that clears zero in the helpful direction. */
+const EFF = Object.fromEntries(D.effects.map(e => [e.feature, e]));
+const NOT_A_LEVER = new Set(["method_types=protest"]), LEVER_FIELDS = new Set([...CHIP_FIELDS.filter(f => !["organizer_types", "funder_types"].includes(f)), "public_spectrum", ...SELECTS, "formal_evaluation", "staff", "volunteers"]);
+const backed = (feat, sign) => { const e = EFF[feat]; return e && !NOT_A_LEVER.has(feat) && e.n >= 60 && (sign > 0 ? e.lo > 0 : e.hi < 0); };
+function moves() {                                         // every single change to the current design, ranked by its effect
+  const p0 = score(vectorFor(S)), out = [];
+  const tryIt = (label, why, feat, sign, mut) => { const t = cloneS(); mut(t); const d = score(vectorFor(t)) - p0; out.push({ label, why, d, mut, ok: backed(feat, sign) }); };
+  CHIP_FIELDS.forEach(f => Object.entries(SC.multi[f].options).forEach(([c, lab]) => { const has = (S.multi[f] || []).includes(c);
+    if (!LEVER_FIELDS.has(f)) return;
+    tryIt(has ? `Drop: ${lab}` : `Add: ${lab}`, FIELDNAME[f], `${f}=${c}`, has ? -1 : 1, t => { t.multi[f] = has ? t.multi[f].filter(v => v !== c) : [...(t.multi[f] || []), c]; }); }));
+  ["public_spectrum", ...SELECTS].forEach(f => Object.entries(SC.single[f].options).forEach(([c, lab]) => { if (S.single[f] === c) return;
+    tryIt(`${FIELDNAME[f]}: ${lab}`, "instead of " + (S.single[f] ? SC.single[f].options[S.single[f]] : "not set"), `${f}=${c}`, 1, t => { t.single[f] = c; }); }));
+  ["formal_evaluation", "staff", "volunteers"].forEach(f => tryIt(S.bin[f] ? `Drop: ${SC.binary[f].label}` : `Add: ${SC.binary[f].label}`, "follow-through", f, S.bin[f] ? -1 : 1, t => { t.bin[f] = S.bin[f] ? 0 : 1; }));
+  return { p0, out: out.sort((a, b) => b.d - a.d) };
+}
+const FIELDNAME = { targeted_participants: "Outreach", method_types: "Method", participants_interactions: "Interaction", learning_resources: "Learning", decision_methods: "Decision method",
+  insights_outcomes: "Sharing results", organizer_types: "Organizer", funder_types: "Funder", public_spectrum: "Spectrum", open_limited: "Who can take part", recruitment_method: "Recruitment",
+  facetoface_online_or_both: "Format", facilitator_training: "Facilitation", time_limited: "Timing" };
+
+function gauge(p, base) {
+  const R = 52, C = 2 * Math.PI * R, svg = `<svg width="132" height="132" viewBox="0 0 132 132" role="img" aria-label="${pct(p)} chance">
+    <circle cx="66" cy="66" r="${R}" fill="none" stroke="var(--sunk)" stroke-width="12"/>
+    <circle class="needle" cx="66" cy="66" r="${R}" fill="none" stroke="${p >= base ? "var(--emerald)" : "var(--rose)"}" stroke-width="12" stroke-linecap="round"
+      stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - p)}" transform="rotate(-90 66 66)"/>
+    <line x1="66" y1="8" x2="66" y2="22" stroke="var(--gold)" stroke-width="3" transform="rotate(${base * 360} 66 66)"/></svg>`;
+  return svg;
+}
+function similar(st, k = 5) {                               // Jaccard on design and context choices, country and scale as tie-breakers
+  const x = vectorFor(st), mine = new Set(); F.forEach((f, i) => { if ((f.kind === "design" || f.kind === "context") && x[i] === 1 && (f.name.includes("=") || f.kind === "design")) mine.add(i); });
+  const ctry = st.country;
+  return D.cases.map(c => { let inter = 0; for (const j of c.f) if (mine.has(j)) inter++; const uni = mine.size + c.f.length - inter;
+      return { c, s: (uni ? inter / uni : 0) + (c.c === ctry ? .04 : 0) }; })
+    .sort((a, b) => b.s - a.s).slice(0, k);
+}
+function update() {
+  const { p0, out } = moves(), base = D.meta.impact_rate_full;
+  const up = out.filter(m => m.ok && m.d > .004 && !m.label.startsWith("Drop")).slice(0, 4), down = out.filter(m => m.d < -.004 && m.label.startsWith("Drop")).slice(-3).reverse();
+  const hurt = out.filter(m => m.ok && m.label.startsWith("Drop") && m.d > .015).slice(0, 2);
+  $("#verdict").innerHTML = `<div class="eyebrow" style="color:var(--muted)">Chance this design documents impact</div>
+    <div class="gauge" style="margin-top:8px">${gauge(p0, base)}<div><div class="big num">${pct(p0)}</div>
+      <div class="cmp">vs <b>${pct(base)}</b> for fully documented cases on Participedia (gold mark)</div>
+      <div class="cmp" style="margin-top:4px">${p0 >= base + .05 ? `<span class="pill yes">Stronger than typical</span>` : p0 <= base - .05 ? `<span class="pill no">Weaker than typical</span>` : `<span class="pill no">About typical</span>`}</div></div></div>
+    <h3 style="margin-top:16px">Changes that would raise it most</h3>
+    <div class="moves">${up.map((m, i) => `<div class="move"><div><b>${esc(m.label)}</b><div class="why">${esc(m.why)}</div></div><div style="display:flex;gap:8px;align-items:center"><span class="num up">${pts(m.d)}</span><button type="button" data-mv="u${i}">Apply</button></div></div>`).join("") || `<p class="note">No single change raises it by more than half a point: this design is close to the best the evidence supports.</p>`}</div>
+    ${hurt.length ? `<h3 style="margin-top:14px">Holding it back</h3><div class="moves">${hurt.map((m, i) => `<div class="move"><div><b>${esc(m.label)}</b><div class="why">${esc(m.why)}; cases with it document impact less often</div></div><div style="display:flex;gap:8px;align-items:center"><span class="num up">${pts(m.d)}</span><button type="button" data-mv="h${i}">Apply</button></div></div>`).join("")}</div>` : ""}
+    ${down.length ? `<p class="note" style="margin-top:12px">Pulling its weight: ${down.map(m => esc(m.label.replace("Drop: ", "")) + ` (${pts(-m.d)})`).join(", ")}.</p>` : ""}
+    <p class="note" style="margin-top:10px">Suggestions are limited to design choices with at least 60 cases behind them and a 90% interval that clears zero. Scores assume the process is written up as fully as complete Participedia entries: an estimate from ${D.meta.cases.toLocaleString("en")} archived cases, not a guarantee.</p>`;
+  document.querySelectorAll("[data-mv]").forEach(b => b.onclick = () => { const k = b.dataset.mv, m = k[0] === "u" ? up[+k.slice(1)] : hurt[+k.slice(1)]; m.mut(S); syncForm(); update(); });
+  $("#similar").innerHTML = similar(S).map(({ c, s }) => `<div class="case"><div class="bar" style="justify-content:space-between;gap:8px">${c.id ? `<a href="${caseUrl(c.id)}" target="_blank" rel="noopener">${esc(c.t)}</a>` : `<b>${esc(c.t)}</b>`}
+      <span class="pill ${c.i ? "yes" : "no"}">${c.i ? "Impact documented" : "No impact recorded"}</span></div>
+      <p>${esc(c.c)}${c.y ? " · " + c.y : ""} · ${Math.round(s * 100)}% match${c.ch && c.ch.length ? " · " + c.ch.map(CHANGE).join(", ") : ""}</p>${c.d ? `<p>${esc(c.d)}${c.d.length >= 180 ? "…" : ""}</p>` : ""}</div>`).join("");
+  drawFit();
+  const c = D.countries[S.country]; $("#ctxNote").textContent = c ? `${S.country}: Gini ${c.gini}, Freedom House ${c.freedom}/100, ${c.internet}% online; ${c.n || 0} cases in the archive, ${pct(c.rate)} documenting impact.` : "";
+}
+/* Context fit: where does this country sit on each indicator (thirds of the archive), and how often is the chosen
+   recruitment method used there? National context shapes what is feasible (the manuscript's boundary conditions);
+   within a tier, the archive shows no sign that it changes which method goes with documented impact. */
+const RLAB = { stratified: "Stratified random sample", random: "Random sample", captive: "Captive sample", appointment: "Appointment", election: "Election" };
+const IND = { gini: ["Income inequality (Gini)", ["Lower", "Middle", "Higher"]], freedom: ["Freedom House score", ["Lower", "Middle", "Higher"]], internet: ["Internet use", ["Lower", "Middle", "Higher"]] };
+function drawFit() {
+  const c = D.countries[S.country], r = S.single.recruitment_method, FT = D.fit;
+  if (!c) { $("#fit").innerHTML = '<p class="note">No national indicators for this country.</p>'; return; }
+  const tierOf = (k, v) => v <= FT.cuts[k][0] ? "Low" : v <= FT.cuts[k][1] ? "Mid" : "High";
+  const rows = Object.keys(IND).map(k => { const t = tierOf(k, c[k]), mix = FT.mix[k][t], share = r ? mix[r] : null, top = RECRUIT_ORDER.slice().sort((a, b) => mix[b] - mix[a])[0];
+    return { k, t, v: c[k], mix, share, top }; });
+  const overall = r ? ["Low", "Mid", "High"].reduce((s, t) => s + FT.mix.gini[t][r] * FT.mix.gini[t].n, 0) / ["Low", "Mid", "High"].reduce((s, t) => s + FT.mix.gini[t].n, 0) : null;
+  const rare = r ? rows.filter(x => x.share < .65 * overall) : [];
+  $("#fit").innerHTML = `<table class="t"><tr><th>Indicator</th><th>${esc(S.country)}</th><th>Third</th><th class="r">${r ? esc(RLAB[r]) : "Most used"}</th></tr>` +
+    rows.map(x => `<tr><td>${IND[x.k][0]}</td><td class="num">${x.k === "internet" ? x.v + "%" : x.v}</td><td>${IND[x.k][1][["Low", "Mid", "High"].indexOf(x.t)]}</td>
+      <td class="r num ${r && x.share < .65 * overall ? "down" : ""}">${r ? pct(x.share) : esc(RLAB[x.top]) + " " + pct(x.mix[x.top])}</td></tr>`).join("") + "</table>" +
+    (!r ? `<p class="note">Choose a recruitment method above to check it against your context.</p>`
+      : rare.length ? `<p style="margin:10px 0 0"><span class="pill no">Less common here</span> ${esc(RLAB[r])} is used in ${pct(Math.min(...rare.map(x => x.share)))} of cases in the ${rare.map(x => IND[x.k][1][["Low", "Mid", "High"].indexOf(x.t)].toLowerCase() + " third on " + { gini: "income inequality", freedom: "Freedom House score", internet: "internet use" }[x.k]).join(" and the ")}, against ${pct(overall)} across the archive.${r === "stratified" || r === "random" ? " Where organizers there do achieve representative samples, they usually partner with civil-society organizations and local institutions that already convene people." : ""}</p>`
+      : `<p style="margin:10px 0 0"><span class="pill yes">Common here</span> ${esc(RLAB[r])} is used in at least ${pct(Math.min(...rows.map(x => x.share)))} of cases in each of your country's thirds (${pct(overall)} across the archive).</p>`) +
+    `<p class="note" style="margin-top:8px">Context shapes which methods organizers use. Within each third, the archive shows no sign that it changes which method goes with documented impact.</p>`;
+}
+const RECRUIT_ORDER = ["stratified", "random", "captive", "appointment", "election"];
+const CHANGE = k => ({ changes: "changed policy", changes_public: "changed public opinion", changes_civic: "built civic capacity", changes_how: "changed how institutions work", conflict: "eased a conflict" }[k] || k);
+function syncForm() {
+  document.querySelectorAll("#presets button").forEach(b => b.setAttribute("aria-pressed", b.textContent === preset));
+  $("#country").value = S.country; $("#issue").value = S.issue; $("#scope").value = S.scope; $("#purpose").value = S.purpose; $("#participants").value = S.participants;
+  SELECTS.forEach(f => $("#" + f).value = S.single[f] || "");
+  document.querySelectorAll("#spectrum button").forEach(b => b.setAttribute("aria-pressed", S.single.public_spectrum === b.dataset.v));
+  CHIP_FIELDS.forEach(f => document.querySelectorAll(`#c_${f} .chip`).forEach(b => b.setAttribute("aria-pressed", (S.multi[f] || []).includes(b.dataset.v))));
+  ["formal_evaluation", "staff", "volunteers", "legality"].forEach(f => $("#" + f).checked = !!S.bin[f]);
+}
+function buildForm() {
+  $("#presets").innerHTML = '<span class="note" style="align-self:center">Start from</span>' + Object.keys(PRESETS).map(k => `<button type="button">${k}</button>`).join("");
+  document.querySelectorAll("#presets button").forEach(b => b.onclick = () => applyPreset(b.textContent));
+  const opts = (o, blank) => (blank ? `<option value="">${blank}</option>` : "") + Object.entries(o).map(([k, v]) => `<option value="${esc(k)}">${esc(v)}</option>`).join("");
+  $("#country").innerHTML = Object.keys(D.countries).sort().map(c => `<option>${esc(c)}</option>`).join("");
+  $("#issue").innerHTML = opts(SC.multi.general_issues.options); $("#scope").innerHTML = opts(SC.single.scope_of_influence.options); $("#purpose").innerHTML = opts(SC.multi.purposes.options);
+  SELECTS.forEach(f => $("#" + f).innerHTML = opts(SC.single[f].options, "Not decided"));
+  const spec = { inform: "one-way information", consult: "ask for feedback", involve: "work with throughout", collaborate: "partner on decisions", empower: "the public decides" };
+  $("#spectrum").innerHTML = Object.entries(SC.single.public_spectrum.options).map(([k, v]) => `<button type="button" data-v="${k}">${v}<small>${spec[k]}</small></button>`).join("");
+  document.querySelectorAll("#spectrum button").forEach(b => b.onclick = () => { S.single.public_spectrum = b.dataset.v; preset = ""; syncForm(); update(); });
+  CHIP_FIELDS.forEach(f => { $("#c_" + f).innerHTML = Object.entries(SC.multi[f].options).map(([k, v]) => `<button type="button" class="chip" data-v="${k}">${esc(v)}</button>`).join("");
+    document.querySelectorAll(`#c_${f} .chip`).forEach(b => b.onclick = () => { const a = S.multi[f] || (S.multi[f] = []), i = a.indexOf(b.dataset.v); i < 0 ? a.push(b.dataset.v) : a.splice(i, 1); preset = ""; syncForm(); update(); }); });
+  ["country", "issue", "scope", "purpose"].forEach(id => $("#" + id).onchange = e => { S[id] = e.target.value; preset = ""; syncForm(); update(); });
+  $("#participants").oninput = e => { S.participants = Math.max(0, +e.target.value || 0); preset = ""; update(); };
+  SELECTS.forEach(f => $("#" + f).onchange = e => { S.single[f] = e.target.value; preset = ""; syncForm(); update(); });
+  ["formal_evaluation", "staff", "volunteers", "legality"].forEach(f => $("#" + f).onchange = e => { S.bin[f] = e.target.checked ? 1 : 0; preset = ""; update(); });
+}
+
+/* ---------------------------------------------------------------- what works: a dot-and-interval chart */
+let band = "all", wfield = "all";
+const WFIELDS = { all: "All", method_types: "Method", public_spectrum: "Power", participants_interactions: "Interaction", learning_resources: "Learning", recruitment_method: "Recruitment", follow: "Follow-through" };
+const FOLLOW = ["insights_outcomes", "formal_evaluation", "organizer_types", "funder_types", "staff", "volunteers", "time_limited", "facilitator_training", "facilitators"];
+function drawWorks() {
+  let rows = D.effects.filter(e => e.n >= 30);
+  if (wfield === "follow") rows = rows.filter(e => FOLLOW.includes(e.field)); else if (wfield !== "all") rows = rows.filter(e => e.field === wfield);
+  const H = band === "all" ? null : D.hetero.find(h => h.band === band);
+  rows = rows.map(e => ({ ...e, v: H ? H.effects[e.feature] : e.effect })).sort((a, b) => b.v - a.v);
+  if (wfield === "all") rows = rows.filter((e, i) => i < 14 || i >= rows.length - 10);
+  const W = 860, L = 300, R = 30, rh = 24, Hh = 40 + rows.length * rh, svg = el("svg", { viewBox: `0 0 ${W} ${Hh}`, role: "img", "aria-label": "Design effects with intervals" });
+  const mx = Math.max(.06, ...rows.map(e => Math.max(Math.abs(e.lo), Math.abs(e.hi), Math.abs(e.v)))) * 1.05, x = v => L + (W - L - R) * (v + mx) / (2 * mx);
+  [-mx, -mx / 2, 0, mx / 2, mx].forEach(v => { el("line", { x1: x(v), x2: x(v), y1: 24, y2: Hh - 8, class: "gl", "stroke-dasharray": v ? "3 4" : "" }, svg);
+    el("text", { x: x(v), y: 16, "text-anchor": "middle", class: "tick" }, svg).textContent = (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v * 100).toFixed(0) + " pts"; });
+  rows.forEach((e, i) => { const y = 36 + i * rh, sig = e.lo > 0 || e.hi < 0, col = !sig ? css("--muted") : e.v >= 0 ? css("--emerald") : css("--rose");
+    el("text", { x: L - 10, y: y + 4, "text-anchor": "end" }, svg).textContent = `${e.label}`;
+    if (!H) el("line", { x1: x(e.lo), x2: x(e.hi), y1: y, y2: y, stroke: col, "stroke-width": 3, "stroke-linecap": "round", opacity: .55 }, svg);
+    const dot = el("circle", { cx: x(e.v), cy: y, r: 6, fill: col }, svg);
+    const t = `<b>${esc(e.label)}</b> <span style="opacity:.7">(${esc(FIELDNAME[e.field] || e.field)})</span><br>${pts(e.v)} average${H ? " in " + esc(band) : ` · 90% interval ${pts(e.lo)} to ${pts(e.hi)}`}<br>${e.n} cases (${pct(e.share)})`;
+    [dot].forEach(n => { n.addEventListener("mousemove", ev => showTip(ev, t)); n.addEventListener("mouseleave", hideTip); }); });
+  $("#forest").innerHTML = ""; $("#forest").appendChild(svg);
+}
+function buildWorks() {
+  $("#workBand").innerHTML = [["all", "All countries"], ...D.hetero.map(h => [h.band, h.band.split(" (")[0]])].map(([k, v]) => `<button type="button" data-b="${esc(k)}" aria-pressed="${k === band}">${esc(v)}</button>`).join("");
+  $("#workField").innerHTML = Object.entries(WFIELDS).map(([k, v]) => `<button type="button" data-f="${k}" aria-pressed="${k === wfield}">${v}</button>`).join("");
+  document.querySelectorAll("#workBand button").forEach(b => b.onclick = () => { band = b.dataset.b; buildWorks(); });
+  document.querySelectorAll("#workField button").forEach(b => b.onclick = () => { wfield = b.dataset.f; buildWorks(); });
+  drawWorks();
+}
+
+/* ---------------------------------------------------------------- context */
+function drawContext() {
+  const G = D.country_gaps, W = 560, Hh = 400, P = { l: 50, r: 16, t: 14, b: 44 }, svg = el("svg", { viewBox: `0 0 ${W} ${Hh}`, role: "img", "aria-label": "Observed vs expected" });
+  const lo = 0, hi = Math.max(...G.map(g => Math.max(g.obs, g.exp))) * 1.08, x = v => P.l + (W - P.l - P.r) * (v - lo) / (hi - lo), y = v => Hh - P.b - (Hh - P.t - P.b) * (v - lo) / (hi - lo);
+  [0, .2, .4, .6, .8].filter(v => v <= hi).forEach(v => { el("line", { x1: x(v), x2: x(v), y1: P.t, y2: Hh - P.b, class: "gl" }, svg); el("line", { x1: P.l, x2: W - P.r, y1: y(v), y2: y(v), class: "gl" }, svg);
+    el("text", { x: x(v), y: Hh - P.b + 16, "text-anchor": "middle", class: "tick" }, svg).textContent = pct(v); el("text", { x: P.l - 6, y: y(v) + 4, "text-anchor": "end", class: "tick" }, svg).textContent = pct(v); });
+  el("line", { x1: x(lo), y1: y(lo), x2: x(hi), y2: y(hi), stroke: css("--gold"), "stroke-width": 1.5, "stroke-dasharray": "5 5" }, svg);
+  el("text", { x: (W + P.l) / 2, y: Hh - 8, "text-anchor": "middle" }, svg).textContent = "Expected from design and documentation";
+  const yl = el("text", { x: 14, y: (Hh - P.b + P.t) / 2, "text-anchor": "middle", transform: `rotate(-90 14 ${(Hh - P.b + P.t) / 2})` }, svg); yl.textContent = "Observed";
+  const mxn = Math.max(...G.map(g => g.n));
+  G.forEach(g => { const c = el("circle", { cx: x(g.exp), cy: y(g.obs), r: 4 + 14 * Math.sqrt(g.n / mxn), fill: g.gap >= 0 ? css("--emerald") : css("--rose"), "fill-opacity": .55, stroke: g.gap >= 0 ? css("--emerald") : css("--rose") }, svg);
+    if (g.n >= 60 || Math.abs(g.gap) > .12) el("text", { x: x(g.exp) + 8, y: y(g.obs) + 4, style: "font-size:11px" }, svg).textContent = g.country;
+    c.addEventListener("mousemove", ev => showTip(ev, `<b>${esc(g.country)}</b><br>${g.n} cases · observed ${pct(g.obs)} · expected ${pct(g.exp)}<br>${pts(g.gap)} vs expected`)); c.addEventListener("mouseleave", hideTip); });
+  $("#gaps").innerHTML = ""; $("#gaps").appendChild(svg);
+  // trend lines
+  const T = D.trend, W2 = 560, H2 = 300, Q = { l: 44, r: 16, t: 14, b: 34 }, s2 = el("svg", { viewBox: `0 0 ${W2} ${H2}`, role: "img", "aria-label": "Trends" });
+  const series = [["deliberative", "Deliberative", "--plum"], ["online", "Online or hybrid", "--gold"], ["impact", "Documents impact", "--emerald"], ["evaluated", "Formally evaluated", "--rose"]];
+  const X = i => Q.l + (W2 - Q.l - Q.r) * i / Math.max(1, T.length - 1), Y = v => H2 - Q.b - (H2 - Q.t - Q.b) * v / .8;
+  [0, .2, .4, .6, .8].forEach(v => { el("line", { x1: Q.l, x2: W2 - Q.r, y1: Y(v), y2: Y(v), class: "gl" }, s2); el("text", { x: Q.l - 6, y: Y(v) + 4, "text-anchor": "end", class: "tick" }, s2).textContent = pct(v); });
+  T.forEach((t, i) => el("text", { x: X(i), y: H2 - 12, "text-anchor": "middle", class: "tick" }, s2).textContent = `${t.from}–${String(t.from + 4).slice(2)}`);
+  series.forEach(([k, lab, c]) => { el("path", { d: T.map((t, i) => (i ? "L" : "M") + X(i) + "," + Y(t[k])).join(""), fill: "none", stroke: css(c), "stroke-width": 2.5 }, s2);
+    T.forEach((t, i) => { const d = el("circle", { cx: X(i), cy: Y(t[k]), r: i === T.length - 1 ? 5 : 3, fill: css(c) }, s2); d.addEventListener("mousemove", ev => showTip(ev, `<b>${lab}</b><br>${t.from}–${t.from + 4}: ${pct(t[k])} of ${t.n} cases`)); d.addEventListener("mouseleave", hideTip); }); });
+  $("#trend").innerHTML = ""; $("#trend").appendChild(s2);
+  $("#trendLegend").innerHTML = series.map(([, lab, c]) => `<span><i style="background:var(${c})"></i>${lab}</span>`).join("");
+  $("#ctab").innerHTML = "<tr><th>Country</th><th class='r'>Cases</th><th class='r'>Documents impact</th><th class='r'>Expected</th><th class='r'>Gap</th><th class='r'>Gini</th><th class='r'>Freedom</th><th class='r'>Online</th></tr>" +
+    G.map(g => { const c = D.countries[g.country] || {}; return `<tr><td>${esc(g.country)}</td><td class="r">${g.n}</td><td class="r">${pct(g.obs)}</td><td class="r">${pct(g.exp)}</td><td class="r ${g.gap >= 0 ? "up" : "down"}">${pts(g.gap)}</td><td class="r">${c.gini ?? "–"}</td><td class="r">${c.freedom ?? "–"}</td><td class="r">${c.internet != null ? c.internet + "%" : "–"}</td></tr>`; }).join("");
+}
+
+/* ---------------------------------------------------------------- evidence gap */
+function hbars(target, rows, key, color) {
+  const W = 560, L = 250, rh = 26, Hh = 10 + rows.length * rh, svg = el("svg", { viewBox: `0 0 ${W} ${Hh}`, role: "img" }), mx = Math.max(...rows.map(r => r[key])) * 1.15;
+  rows.forEach((r, i) => { const y = 6 + i * rh, w = (W - L - 70) * r[key] / mx;
+    el("text", { x: L - 10, y: y + 15, "text-anchor": "end" }, svg).textContent = r.label;
+    const b = el("rect", { x: L, y: y + 3, width: Math.max(2, w), height: rh - 9, rx: 4, fill: css(color) }, svg);
+    el("text", { x: L + w + 8, y: y + 15, class: "tick" }, svg).textContent = pct(r[key]) + (r.n ? ` · ${r.n}` : "");
+    b.addEventListener("mousemove", ev => showTip(ev, `<b>${esc(r.label)}</b><br>${r.n} cases · ${pct(r.evaluated)} evaluated · ${pct(r.impact)} document impact`)); b.addEventListener("mouseleave", hideTip); });
+  $(target).innerHTML = ""; $(target).appendChild(svg);
+}
+let evWho = "by_organizer";
+function drawEvidence() {
+  const E = D.evalgap, ef = D.effects.find(e => e.feature === "formal_evaluation");
+  $("#evLead").textContent = `Only ${pct(E.overall)} of the processes on Participedia were formally evaluated. Evaluated cases document impact ${pct(E.impact_if_evaluated)} of the time against ${pct(E.impact_if_not)} for the rest. Holding design, context and documentation fixed, planning an evaluation still goes with ${pts(ef.effect)}: the largest single lever in the archive.`;
+  $("#evTiles").innerHTML = [["Formally evaluated", pct(E.overall), `${Math.round(E.overall * D.meta.cases)} of ${D.meta.cases.toLocaleString("en")} cases`],
+    ["Impact documented, if evaluated", pct(E.impact_if_evaluated), "evaluated cases"], ["Impact documented, if not", pct(E.impact_if_not), "everything else"],
+    ["Effect of planning an evaluation", pts(ef.effect), `90% interval ${pts(ef.lo)} to ${pts(ef.hi)}`]]
+    .map(([k, v, n], j) => `<div class="card tile"><div class="k">${k}</div><div class="v num ${j === 3 ? "up" : ""}">${v}</div><div class="n">${n}</div></div>`).join("");
+  hbars("#evMethod", E.by_method.slice(0, 12), "evaluated", "--plum");
+  $("#evWho").innerHTML = [["by_organizer", "Organizer"], ["by_funder", "Funder"]].map(([k, v]) => `<button type="button" data-w="${k}" aria-pressed="${k === evWho}">${v}</button>`).join("");
+  document.querySelectorAll("#evWho button").forEach(b => b.onclick = () => { evWho = b.dataset.w; drawEvidence(); });
+  hbars("#evOrg", E[evWho].slice(0, 10), "evaluated", "--gold");
+  const lowM = E.by_method.slice(-3).map(r => r.label.toLowerCase()), topF = E.by_funder[0];
+  $("#evRecs").innerHTML = `<ol>
+    <li><b>Make evaluation a condition of funding, and budget for it.</b> It is the strongest lever in the archive (${pts(ef.effect)}), yet ${pct(1 - E.overall)} of processes skip it.</li>
+    <li><b>Close the gap where it is widest.</b> ${lowM.map(s => s[0].toUpperCase() + s.slice(1)).join(", ")} are evaluated least often; a light-touch evaluation template for these formats would add the most evidence per dollar.</li>
+    <li><b>Copy the funders who already do it.</b> Processes funded by ${esc(topF.label.toLowerCase())}s are evaluated ${pct(topF.evaluated)} of the time.</li>
+    <li><b>Record impact where people look for it.</b> Thin Participedia entries rarely record impact whatever happened: a complete write-up roughly doubles the share that do.</li></ol>`;
+}
+
+/* ---------------------------------------------------------------- new cases */
+function drawNew() {
+  const L = D.live, s = D.live_summary;
+  if (!L.length) { $("#newLead").textContent = "The live update wasn't available when this page was built."; return; }
+  $("#newLead").textContent = `Participedia now lists ${D.meta.live_cases.toLocaleString("en")} case entries. ${s.n.toLocaleString("en")} published cases are not in the capstone dataset: most were added since it was built, a few were renamed. Each is scored here with the same model, from its own design and documentation.`;
+  const imp = L.filter(c => c.imp === 1).length, known = L.filter(c => c.imp != null).length;
+  $("#newTiles").innerHTML = [["Cases not in your dataset", s.n.toLocaleString("en"), "published on Participedia"], ["Posted 2025 or later", L.filter(c => c.posted >= "2025").length, "the newest wave"],
+    ["Record evidence of impact", known ? pct(imp / known) : "–", `of ${known} that answer the question`], ["Complete entries", pct(s.complete / s.n), `${s.stub} are stubs`]]
+    .map(([k, v, n]) => `<div class="card tile"><div class="k">${k}</div><div class="v num">${v}</div><div class="n">${n}</div></div>`).join("");
+  const M = s.method_mix, W = 560, Lw = 250, rh = 30, Hh = 10 + M.length * rh, svg = el("svg", { viewBox: `0 0 ${W} ${Hh}`, role: "img" }), mx = Math.max(...M.map(m => Math.max(m.before, m.new))) * 1.15;
+  M.forEach((m, i) => { const y = 6 + i * rh; el("text", { x: Lw - 10, y: y + 17, "text-anchor": "end" }, svg).textContent = m.label;
+    [["before", "--muted", 0], ["new", "--gold", 11]].forEach(([k, c, o]) => { const w = (W - Lw - 60) * m[k] / mx; el("rect", { x: Lw, y: y + 3 + o, width: Math.max(1, w), height: 10, rx: 3, fill: css(c) }, svg);
+      el("text", { x: Lw + w + 6, y: y + 12 + o, class: "tick" }, svg).textContent = pct(m[k]); }); });
+  $("#mix").innerHTML = ""; $("#mix").appendChild(svg);
+  const delib = M.find(m => m.label.startsWith("Deliberative")), rising = M.filter(m => m.new > m.before + .02).map(m => m.label.toLowerCase());
+  $("#newRead").innerHTML = `<p>${delib ? `Deliberative processes make up ${pct(delib.new)} of the new cases against ${pct(delib.before)} in your dataset.` : ""} ${rising.length ? `Gaining share: ${rising.join(", ")}.` : ""}</p>
+    <p>Many new entries are still thin: ${pct(s.stub / s.n)} are stubs, so their impact is often unrecorded rather than absent. The score column shows the chance each design documents impact <i>as written up so far</i>; it rises as an entry is completed.</p>
+    <p>Use this list to find recent comparators for your own design, or to see which new cases deserve a full write-up.</p>`;
+  const render = () => { const q = $("#newQ").value.trim().toLowerCase();
+    $("#newTab").innerHTML = "<tr><th>Case</th><th>Country</th><th>Posted</th><th>Method</th><th>Entry</th><th>Records impact</th><th class='r'>Model score</th></tr>" +
+      L.filter(c => !q || (c.t + " " + c.c).toLowerCase().includes(q)).slice(0, 120).map(c => `<tr><td><a href="${caseUrl(c.id)}" target="_blank" rel="noopener">${esc(c.t)}</a></td><td>${esc(c.c)}</td><td class="num">${esc(c.posted)}</td>
+        <td>${esc(c.m.join(", "))}</td><td>${esc(c.comp || "–")}</td><td>${c.imp === 1 ? '<span class="pill yes">Yes</span>' : c.imp === 0 ? '<span class="pill no">No</span>' : '<span class="note">Not stated</span>'}</td><td class="r num">${pct(c.p)}</td></tr>`).join(""); };
+  $("#newQ").oninput = render; render();
+}
+
+/* ---------------------------------------------------------------- method */
+function drawMethod() {
+  const m = D.metrics;
+  $("#mbody").innerHTML = `<h2>Method & sources</h2>
+  <p>The advisor turns ${D.meta.cases.toLocaleString("en")} Participedia cases into a model of <b>documented impact</b>: whether a case's entry records evidence that the process changed something (a policy, public opinion, civic capacity or how institutions work). Cases with no impact recorded may still have had impact; the archive simply does not show it.</p>
+  <h3>The model</h3>
+  <p>A regularized logistic regression on ${F.filter(f => f.kind === "design").length} design features, ${F.filter(f => f.kind === "context").length} context features and ${F.filter(f => f.kind === "doc").length} documentation features, with its regularization chosen by five-fold cross-validation (C = ${m.C}). On the capstone's held-out test cases (${m.n_test}) it ranks cases at AUC <b>${m.auc.toFixed(2)}</b>. Gradient-boosted trees reach ${m.auc_trees.toFixed(2)}, but they swing erratically when a single design choice is changed, which is exactly what an advisor does, so the smoother model was chosen. Documentation alone reaches ${m.auc_doc_only.toFixed(2)}: complete entries record impact about three times as often as stubs. That is why every advisor score assumes a fully documented write-up, and why each design effect holds documentation fixed.</p>
+  <p>A design effect is the average change in the model's probability when one choice is switched on rather than off for every case, with a 90% interval from 200 refits on resampled cases. Fields recorded only when impact exists (types of change, who implemented it) are never used as predictors. The model's numbers ship inside this page, so the advisor scores your design in your browser with exactly the model described here.</p>
+  <h3>How this relates to the research paper</h3>
+  <p>The advisor extends Zakaria and Carson, <i>Mapping Civic Engagement Design: A Macro-Micro Hybrid Ensemble Framework for Institutional Governance</i> (under review), which uses the same 2,260 cases and the same train/test split. The paper predicts <b>which family of method</b> a case belongs to; the advisor predicts <b>whether a design goes with documented impact</b>. The two agree on the central point and add to each other:</p>
+  <ul>
+    <li><b>National context is a modest signal.</b> In the paper, Gini, Freedom House and internet use carry 7.4% of the ensemble's weight. Here, adding them to the impact model changes cross-validated AUC from ${D.alignment.auc_no_macro.toFixed(3)} to ${D.alignment.auc_all.toFixed(3)}; on their own they reach ${D.alignment.auc_macro_only.toFixed(2)}.</li>
+    <li><b>Context sets boundary conditions on what is used.</b> The paper's Table 8 reproduces here (thirds of the archive on each indicator): stratified sampling falls from ${pct(D.fit.mix.gini.Low.stratified)} of cases in the most equal third to ${pct(D.fit.mix.gini.High.stratified)} in the most unequal, while captive recruitment rises from ${pct(D.fit.mix.gini.Low.captive)} to ${pct(D.fit.mix.gini.High.captive)}. The advisor's <b>Context fit</b> panel applies this to your country.</li>
+    <li><b>But context does not change what works.</b> Letting each recruitment method's association with documented impact differ by freedom and inequality does not improve the model (AUC ${D.alignment.auc_interactions.toFixed(3)} vs ${D.alignment.auc_all.toFixed(3)}). Context shapes which methods are feasible; evaluation, power-sharing and follow-through shape whether impact is documented.</li>
+    <li><b>Documentation drives both models.</b> The paper's largest category, Other/Direct, is mostly cases with no method type recorded, and its strongest features (text length, recruitment complexity) are lower when fields are blank. The advisor makes this explicit by holding documentation fixed.</li></ul>
+  <h3>Limits</h3><ul>
+    <li><b>Associations, not causes.</b> Organizers who evaluate may also run better processes; the archive cannot separate the two.</li>
+    <li><b>Who writes cases.</b> Participedia is written by volunteers and researchers; well-resourced, English-language and academic cases are over-represented.</li>
+    <li><b>Imputed context.</b> ${"Gini, Freedom House and internet values were imputed for some countries in the capstone; the <code>was_imputed</code> flag is not used."}</li></ul>
+  <h3>Sources</h3><ul>
+    <li><a href="https://participedia.net" target="_blank" rel="noopener">Participedia</a>: case records (CC BY-SA 4.0), via the ALY6980 capstone dataset (${D.meta.cases.toLocaleString("en")} cases) and Participedia's public case index and case pages, read ${esc(D.meta.fetched || "")}.</li>
+    <li>World Bank Gini index and internet use; Freedom House Global Freedom scores, as merged in the capstone dataset.</li>
+    <li>The companion <a href="https://app.powerbi.com/view?r=eyJrIjoiZmFlMDhlMTEtOWE3NC00ZTRhLWFjNjEtZGY2ZGRiOGVkMGVlIiwidCI6ImM3ZTc5YjlkLWVjZTktNDEzMy04NzQzLWI2Y2FkMjZjNTc0ZiIsImMiOjEwfQ%3D%3D" target="_blank" rel="noopener">Participedia Global Research Interactive Dashboard</a> (Power BI) maps where cases happen; this advisor asks what to do with that knowledge.</li></ul>`;
+}
+
+/* ---------------------------------------------------------------- start */
+const M0 = D.meta;
+$("#hCases").textContent = M0.cases.toLocaleString("en"); $("#hCountries").textContent = M0.countries;
+$("#facts").innerHTML = [[M0.cases.toLocaleString("en"), "cases analysed"], [pct(D.evalgap.overall), "formally evaluated"], [pts(D.effects.find(e => e.feature === "formal_evaluation").effect), "from planning an evaluation"]]
+  .map(([b, s]) => `<div class="fact"><b class="num">${b}</b><span>${s}</span></div>`).join("");
+const tabs = [...document.querySelectorAll("nav.tabs a")], drawn = {};
+const DRAW = { works: buildWorks, context: drawContext, evidence: drawEvidence, new: drawNew, method: drawMethod };
+function show(id) { if (!document.getElementById(id)) id = "advisor";
+  document.querySelectorAll("main section").forEach(s => s.hidden = s.id !== id); tabs.forEach(a => a.setAttribute("aria-current", a.dataset.tab === id ? "page" : "false"));
+  if (!drawn[id] && DRAW[id]) { drawn[id] = true; DRAW[id](); } }
+tabs.forEach(a => a.onclick = e => { e.preventDefault(); show(a.dataset.tab); try { history.replaceState(null, "", "#" + a.dataset.tab); } catch (_) {} });
+buildForm(); applyPreset("Citizens' assembly");
+show((location.hash || "#advisor").slice(1));
+</script>
