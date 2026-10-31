@@ -101,6 +101,34 @@ The advisor extends Zakaria and Carson, *Mapping Civic Engagement Design: A Macr
 - **National context is a modest signal in both.** It carries 7.4% of the paper's ensemble weight. Here, the three indicators move cross-validated AUC from 0.860 without them to 0.859 with them.
 - **The paper's Table 8 reproduces.** It holds when tiers are equal thirds of the archive: captive and appointment recruitment rise, and stratified sampling falls, with inequality and lower freedom and connectivity. The advisor's **Context fit** panel applies this to the user's country.
 - **Context shapes what organizers use, not whether it works.** Letting recruitment effects vary by freedom and inequality does not improve the impact model.
+
+## Participatory-democracy case classifier
+
+The research paper's own model, kept here alongside the advisor that builds on it. The classifier asks what kind of participatory process a case is. The advisor asks whether a design goes with documented impact.
+
+| | |
+|---|---|
+| Task | Classify each of the 2,260 Participedia cases into one of five method families: Collaborative/Governance, Community/Informal, Deliberative/Dialogic, Public/Consultative, Other/Direct |
+| Model | Hybrid soft-voting ensemble: CatBoost (65%) reads the case text and structured fields; XGBoost (35%) reads the structured fields |
+| Features | Case description text, recruitment complexity, government, local and online flags, and national context: Gini index, Freedom House score, internet use |
+| Result reported in the paper | **76% accuracy** on held-out cases, against baseline models near 52% |
+| Forecast | Annual case volumes by method family through 2030 |
+| Status | Zakaria, O., & Carson, J., *Mapping Civic Engagement Design: A Macro-Micro Hybrid Ensemble Framework for Institutional Governance*, under review at Taylor & Francis |
+
+National context carries 7.4% of the ensemble's weight: description and recruitment decide most of a case's method family, and freedom, inequality and connectivity sharpen it.
+
+To refit the ensemble on the paper's train/test split, install the two boosting libraries and run [`pdx/paper_rerun.py`](pdx/paper_rerun.py):
+
+```bash
+python -m pip install catboost xgboost
+```
+
+```bash
+python -m pdx.paper_rerun
+```
+
+It reads the capstone dataset (path in `pdx/config.py`) and writes `outputs/paper_rerun.json`. That file is kept out of the repository while the paper is under review.
+
 ## Data sources
 
 | Source | What it provides | Access |
