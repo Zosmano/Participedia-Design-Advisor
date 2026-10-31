@@ -4,7 +4,9 @@
 
 The companion [Participedia Global Research Interactive Dashboard](https://app.powerbi.com/view?r=eyJrIjoiZmFlMDhlMTEtOWE3NC00ZTRhLWFjNjEtZGY2ZGRiOGVkMGVlIiwidCI6ImM3ZTc5YjlkLWVjZTktNDEzMy04NzQzLWI2Y2FkMjZjNTc0ZiIsImMiOjEwfQ%3D%3D) (Power BI) shows *where* participatory processes happen and in what national context. This microproduct turns the same archive into decisions. It learns from 2,260 Participedia cases in 124 countries (the ALY6980 capstone dataset), adds the 356 cases published since then on [participedia.net](https://participedia.net), and gives organizers, funders and public bodies:
 
-[![Live advisor](https://img.shields.io/badge/Open_the_advisor-2B1B3D?style=for-the-badge)](https://claude.ai/artifact/87jyW9QnXejGsaLFCMZaNM)
+[![Live advisor](https://img.shields.io/badge/Open_the_advisor-2B1B3D?style=for-the-badge)](https://zosmano.github.io/participation-design-advisor/)
+[![Python](https://img.shields.io/badge/Python_pipeline-1D7A5F?style=for-the-badge&logo=python&logoColor=white)](#run-it)
+[![Data sources](https://img.shields.io/badge/Data_sources-B8862B?style=for-the-badge)](#data-sources)
 
 - **Design advisor.** Describe a process: country, issue, scope, purpose, how much power participants get (the IAP2 spectrum, Inform to Empower), who takes part and how they are recruited, method, interaction, learning, decision method, format, facilitation, how results are shared, and evaluation.
   - It shows the chance that a process designed this way documents evidence of impact, assuming a full write-up, against the archive's average.
@@ -15,6 +17,25 @@ The companion [Participedia Global Research Interactive Dashboard](https://app.p
 - **Context.** Countries that document impact more or less often than their cases' design and documentation predict, and how participation has changed since 1990 (deliberative share, online and hybrid formats, evaluation, documented impact).
 - **The evidence gap.** Who evaluates and who doesn't, by method, organizer and funder, with four recommendations for funders and commissioners.
 - **New on Participedia.** The 356 published cases not in the capstone dataset, scored by the same model, with the shift in method mix.
+
+## Visual tour
+
+The interactive advisor runs in the browser ([live version](https://zosmano.github.io/participation-design-advisor/), or open `docs/index.html` locally). These charts summarize what it shows.
+
+### What goes with documented impact
+![Design effects](docs/figures/design_effects.png)
+
+### The evidence gap
+![Evidence gap](docs/figures/evidence_gap.png)
+
+### Where impact gets documented, and how participation has changed
+![Context](docs/figures/context.png)
+
+### Context sets boundary conditions on recruitment
+![Context fit](docs/figures/context_fit.png)
+
+### New on Participedia
+![New cases](docs/figures/new_cases.png)
 
 ## Findings
 
@@ -80,7 +101,7 @@ python -m pip install pandas numpy scikit-learn
 python run_all.py --live
 ```
 
-`--live` refreshes Participedia's case index and fetches cases added since the capstone; without it, the last fetch is reused. Outputs go to `outputs/`: the app (`participation_design_advisor.html`), `payload.json`, `design_effects.csv` and `live_new_cases_scored.csv`.
+`--live` refreshes Participedia's case index and fetches cases added since the capstone; without it, the last fetch is reused. Outputs go to `outputs/`: the app (`participation_design_advisor.html`), `payload.json`, `design_effects.csv` and `live_new_cases_scored.csv`. The run also writes `docs/index.html` (the app, served by GitHub Pages) and the README charts in `docs/figures/` (`pdx/figures.py`).
 
 ## Limits
 
