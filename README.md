@@ -4,7 +4,7 @@
 
 The companion [Participedia Global Research Interactive Dashboard](https://app.powerbi.com/view?r=eyJrIjoiZmFlMDhlMTEtOWE3NC00ZTRhLWFjNjEtZGY2ZGRiOGVkMGVlIiwidCI6ImM3ZTc5YjlkLWVjZTktNDEzMy04NzQzLWI2Y2FkMjZjNTc0ZiIsImMiOjEwfQ%3D%3D) (Power BI) shows *where* participatory processes happen and in what national context. This microproduct turns the same archive into decisions. It learns from 2,260 Participedia cases in 124 countries (the ALY6980 capstone dataset), adds the 356 cases published since then on [participedia.net](https://participedia.net), and gives organizers, funders and public bodies:
 
-[![Live advisor](https://img.shields.io/badge/Open_the_advisor-2B1B3D?style=for-the-badge)](https://zosmano.github.io/Participedia-Design-Advisor/)
+[![Live advisor](https://img.shields.io/badge/Open_the_advisor-2B1B3D?style=for-the-badge)](https://zosmano.github.io/Participedia-Design-Advisor/docs/)
 [![Python](https://img.shields.io/badge/Python_pipeline-1D7A5F?style=for-the-badge&logo=python&logoColor=white)](#run-it)
 [![Data sources](https://img.shields.io/badge/Data_sources-B8862B?style=for-the-badge)](#data-sources)
 
@@ -20,7 +20,7 @@ The companion [Participedia Global Research Interactive Dashboard](https://app.p
 
 ## Visual tour
 
-The interactive advisor runs in the browser ([live version](https://zosmano.github.io/Participedia-Design-Advisor/), or open `docs/index.html` locally). These charts summarize what it shows.
+The interactive advisor runs in the browser ([live version](https://zosmano.github.io/Participedia-Design-Advisor/docs/), or open `docs/index.html` locally). These charts summarize what it shows.
 
 ### What goes with documented impact
 ![Design effects](docs/figures/design_effects.png)
