@@ -80,7 +80,7 @@ The advisor extends Zakaria and Carson, *Mapping Civic Engagement Design: A Macr
 |---|---|---|
 | ALY6980 capstone dataset (`Participedia Dataset_Integrated_Model_Imputed.csv`) | 2,260 Participedia cases with 113 fields, merged with country indicators | Local file |
 | [Participedia](https://participedia.net), public case index and case pages | Documentation completeness of every entry; full records of the 356 published cases added since the capstone | `search?resultType=map&returns=json` and `case/<id>?returns=json`; case data under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
-| World Bank (Gini index, internet use); Freedom House (Global Freedom score) | National context, as merged in the capstone dataset | Via the capstone dataset |
+| World Bank (Gini index, internet use); Freedom House (Global Freedom score) | National context, as merged in the capstone dataset | Via the World Bank & Freedom House websites |
 
 Participedia's own "Results CSV" export requires signing in, so the live update reads the same records through the public JSON pages instead, one request at a time with a pause between requests.
 
