@@ -28,6 +28,13 @@ def load():
     for r in rec:
         if r["country"] and r["country"] not in ctx and not any(pd.isna(v) for v in (r["gini"], r["freedom"], r["internet"])):
             ctx[r["country"]] = (float(r["gini"]), float(r["freedom"]), float(r["internet"]))
+    return d, rec, load_live(idx, ctx), idx, ctx
+
+
+def load_live(idx, ctx):
+    """Published live cases fetched since the snapshot, as model records."""
+    cases = idx[idx.type == "case"]
+    comp, posted = cases.set_index("id").completeness, cases.set_index("id").post_date
     live = []
     p = C.RAW / "live_new_cases.jsonl"
     if p.exists():
@@ -36,10 +43,47 @@ def load():
             if a.get("published") in (False, "false") or a.get("hidden") in (True, "true"):
                 continue
             o = FT.from_live(a, ctx)
-            o["completeness"] = (cases.set_index("id").completeness.get(int(a["id"])) if int(a["id"]) in set(cases.id) else "") or ""
-            o["posted"] = str(cases.set_index("id").post_date.get(int(a["id"]), ""))[:10]
+            cid = int(a["id"])
+            o["completeness"] = (comp.get(cid) if cid in comp.index else "") or ""
+            pd_ = posted.get(cid)
+            o["posted"] = "" if pd_ is None or pd.isna(pd_) else str(pd_)[:10]   # a few entries have no post date
             live.append(o)
-    return d, rec, live, idx
+    return live
+
+
+def score_live(live, predict, before):
+    """Score live cases and summarise them against the snapshot. predict: feature matrix -> probabilities;
+    before: share of snapshot cases using each method type."""
+    if not live:
+        return [], {}
+    XL = FT.matrix(live)
+    pl = predict(XL)
+    out = []
+    for o, p in zip(live, pl):
+        out.append({"t": o["title"], "c": o["country"] or "", "id": o["id"], "posted": o.get("posted", ""), "y": o["start_year"],
+                    "comp": o["completeness"], "imp": o["impact"], "p": round(float(p), 3),
+                    "m": [FT.MULTI["method_types"][1].get(k, k) for k in o["method_types"]][:3], "d": (o["description"] or "")[:180]})
+    out.sort(key=lambda r: r["posted"], reverse=True)
+    lm = pd.DataFrame(out)
+    summary = {"n": len(out), "with_impact_field": int(lm.imp.notna().sum()),
+               "impact_rate": float(lm.imp.dropna().mean()) if lm.imp.notna().any() else None,
+               "complete": int((lm.comp == "complete").sum()), "stub": int((lm.comp == "stub").sum())}
+    mix = [{"label": lab, "before": before[code], "new": float(XL[f"method_types={code}"].mean())}
+           for code, lab in FT.MULTI["method_types"][1].items()]
+    summary["method_mix"] = sorted(mix, key=lambda r: -(r["before"] + r["new"]))[:10]
+    return out, summary
+
+
+LIVE_CONTEXT = C.ROOT / "pdx" / "live_context.json"
+
+
+def save_live_context(ctx, X):
+    """What the monthly refresh needs from the capstone, without the capstone itself: each country's public
+    indicators (World Bank, Freedom House) and the snapshot's method-type shares."""
+    method_before = {code: float(X[f"method_types={code}"].mean()) for code in FT.MULTI["method_types"][1]}
+    countries = {k: list(v) for k, v in sorted((k, v) for k, v in ctx.items() if isinstance(k, str))}
+    LIVE_CONTEXT.write_text(json.dumps({"countries": countries, "method_before": method_before},
+                                       indent=1), encoding="utf-8")
 
 
 MACRO_COLS = {"gini": "gini_index_model_input", "freedom": "freedom_score_model_input", "internet": "internet_pct_model_input"}
@@ -80,8 +124,9 @@ def alignment(X, y):
 
 
 def run():
-    d, rec, live, idx = load()
+    d, rec, live, idx, ctx = load()
     X = FT.matrix(rec)
+    save_live_context(ctx, X)
     y = pd.Series([r["impact"] for r in rec])
     tr = np.array([r["split"] == "train" for r in rec])
     cols = FT.columns()
@@ -148,26 +193,8 @@ def run():
                           "ch": r["change_types"], "d": (r["description"] or "")[:180]})
 
     # live cases since the snapshot
-    live_out, live_summary = [], {}
-    if live:
-        XL = FT.matrix(live)
-        XL_ref = XL.copy()
-        pl = gb.predict_proba(XL)[:, 1]
-        for o, p in zip(live, pl):
-            live_out.append({"t": o["title"], "c": o["country"] or "", "id": o["id"], "posted": o.get("posted", ""), "y": o["start_year"],
-                             "comp": o["completeness"], "imp": o["impact"], "p": round(float(p), 3),
-                             "m": [FT.MULTI["method_types"][1].get(k, k) for k in o["method_types"]][:3], "d": (o["description"] or "")[:180]})
-        live_out.sort(key=lambda r: r["posted"], reverse=True)
-        lm = pd.DataFrame(live_out)
-        live_summary = {"n": len(live_out), "with_impact_field": int(lm.imp.notna().sum()), "impact_rate": float(lm.imp.dropna().mean()) if lm.imp.notna().any() else None,
-                        "complete": int((lm.comp == "complete").sum()), "stub": int((lm.comp == "stub").sum())}
-        # method mix: snapshot vs new
-        mix = []
-        for code, lab in FT.MULTI["method_types"][1].items():
-            a = float(X[f"method_types={code}"].mean())
-            b = float(XL[f"method_types={code}"].mean())
-            mix.append({"label": lab, "before": a, "new": b})
-        live_summary["method_mix"] = sorted(mix, key=lambda r: -(r["before"] + r["new"]))[:10]
+    before = {code: float(X[f"method_types={code}"].mean()) for code in FT.MULTI["method_types"][1]}
+    live_out, live_summary = score_live(live, lambda Z: gb.predict_proba(Z)[:, 1], before)
 
     # trends: share of cases by start decade for the main method types
     yrs = pd.Series([r["start_year"] for r in rec])

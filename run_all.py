@@ -2,6 +2,8 @@
 
     python run_all.py --live      # refresh Participedia's public case index and fetch cases added since the capstone
     python run_all.py             # model, design effects, evidence gap, live scoring -> outputs/ and the app
+    python run_all.py --refresh   # monthly, no capstone needed: fetch and score new cases with the saved model,
+                                  # then rebuild the app and charts (what GitHub Actions runs)
 """
 import json
 import sys
@@ -25,6 +27,11 @@ def build(payload):
 
 
 if __name__ == "__main__":
+    if "--refresh" in sys.argv:
+        from pdx import figures, refresh
+        build(refresh.run())
+        figures.build()
+        sys.exit(0)
     if "--live" in sys.argv:
         live.index()
         live.fetch_new(pd.read_csv(C.CAPSTONE, usecols=["title"]).title.dropna())

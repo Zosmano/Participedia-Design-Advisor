@@ -2,7 +2,7 @@
 
 **Before you convene a citizens' assembly, a participatory budget or a community workshop: which design choices have gone with documented impact, what do the closest past cases tell you, and how will you show it worked?**
 
-The companion [Participedia Global Research Interactive Dashboard](#companion-power-bi-dashboard) (Power BI, included in this repository) shows *where* participatory processes happen and in what national context. This microproduct turns the same archive into decisions. It learns from 2,260 Participedia cases in 124 countries (the ALY6980 capstone dataset), adds the 356 cases published since then on [participedia.net](https://participedia.net), and gives organizers, funders and public bodies:
+The companion [Participedia Global Research Interactive Dashboard](#companion-power-bi-dashboard) (Power BI, included in this repository) shows *where* participatory processes happen and in what national context. This microproduct turns the same archive into decisions. It learns from 2,260 Participedia cases in 124 countries (the ALY6980 capstone dataset), adds every case published since then on [participedia.net](https://participedia.net), refreshed automatically each month, and gives organizers, funders and public bodies:
 
 [![Live advisor](https://img.shields.io/badge/Open_the_advisor-2B1B3D?style=for-the-badge)](https://zosmano.github.io/Participedia-Design-Advisor/docs/)
 [![Power BI](https://img.shields.io/badge/Power_BI-Live_Dashboard-F2C811?style=for-the-badge&logo=powerbi&logoColor=black)](https://app.powerbi.com/view?r=eyJrIjoiZmFlMDhlMTEtOWE3NC00ZTRhLWFjNjEtZGY2ZGRiOGVkMGVlIiwidCI6ImM3ZTc5YjlkLWVjZTktNDEzMy04NzQzLWI2Y2FkMjZjNTc0ZiIsImMiOjEwfQ%3D%3D)
@@ -17,7 +17,7 @@ The companion [Participedia Global Research Interactive Dashboard](#companion-po
 - **What works.** The average effect of every design choice on documented impact, with 90% intervals, filterable by design area and by political context (Freedom House bands).
 - **Context.** Countries that document impact more or less often than their cases' design and documentation predict, and how participation has changed since 1990 (deliberative share, online and hybrid formats, evaluation, documented impact).
 - **The evidence gap.** Who evaluates and who doesn't, by method, organizer and funder, with four recommendations for funders and commissioners.
-- **New on Participedia.** The 356 published cases not in the capstone dataset, scored by the same model, with the shift in method mix.
+- **New on Participedia.** Every published case not in the capstone dataset, scored by the same model, with the shift in method mix. A GitHub Actions job fetches and scores new cases on the 1st of each month and republishes the advisor.
 - **Story films.** Three short animated films in three acts (the question, the evidence, the design), with synthesized sound and a narrator: the evaluation lever nobody pulls, how power goes with impact, and the lever that travels across political contexts. Panels rise in, figures count up and charts draw themselves as each tab opens, unless the viewer's system asks for reduced motion.
 
 ## Visual tour
@@ -150,14 +150,16 @@ Participedia's own "Results CSV" export requires signing in, so the live update 
 ## Run it
 
 ```bash
-python -m pip install pandas numpy scikit-learn
+python -m pip install -r requirements.txt
 ```
 
 ```bash
 python run_all.py --live
 ```
 
-`--live` refreshes Participedia's case index and fetches cases added since the capstone; without it, the last fetch is reused. Outputs go to `outputs/`: the app (`participation_design_advisor.html`), `payload.json`, `design_effects.csv` and `live_new_cases_scored.csv`. The run also writes `docs/index.html` (the app, served by GitHub Pages) and the README charts in `docs/figures/` (`pdx/figures.py`).
+`--live` refreshes Participedia's case index and fetches cases added since the capstone; without it, the last fetch is reused. Outputs go to `outputs/`: the app (`participation_design_advisor.html`), `payload.json`, `design_effects.csv` and `live_new_cases_scored.csv`. The run also writes `docs/index.html` (the app, served by GitHub Pages) and the README charts in `docs/figures/` (`pdx/figures.py`). A full run needs the capstone dataset, which is not in this repository.
+
+**Monthly live refresh.** `python run_all.py --refresh` needs no private data. It reads Participedia's public case index, fetches each published case not in the capstone, scores it with the model already saved in `outputs/payload.json`, and rebuilds the advisor and charts. Country indicators for new cases come from `pdx/live_context.json` (public World Bank and Freedom House values per country, written by each full run). Everything learned from the capstone stays as the last full run left it. GitHub Actions runs this on the 1st of each month (`.github/workflows/refresh.yml`); to run it now, open the **Actions** tab, choose **live refresh** and click **Run workflow**.
 
 ## Limits
 
