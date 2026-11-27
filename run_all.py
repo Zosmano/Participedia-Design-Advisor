@@ -30,7 +30,7 @@ if __name__ == "__main__":
     if "--refresh" in sys.argv:
         from pdx import figures, refresh
         build(refresh.run())
-        figures.build()
+        figures.build(only_live=True)
         sys.exit(0)
     if "--live" in sys.argv:
         live.index()

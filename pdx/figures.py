@@ -165,10 +165,12 @@ def new_cases(p):
     plt.close(fig)
 
 
-def build():
+def build(only_live=False):
+    """All five README charts; only_live=True redraws just the one the monthly refresh changes (new cases),
+    leaving the capstone charts exactly as the last full run drew them."""
     FIG.mkdir(parents=True, exist_ok=True)
     p = json.loads((C.OUT / "payload.json").read_text())
-    for f in (effects, evidence, context, fit, new_cases):
+    for f in ((new_cases,) if only_live else (effects, evidence, context, fit, new_cases)):
         f(p)
     print("figures ->", FIG)
 
