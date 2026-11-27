@@ -19,7 +19,7 @@ concurrency:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 150   # the first run fetches every case's public record (~45 min); later runs only updates
     steps:
       - uses: actions/checkout@v4
 

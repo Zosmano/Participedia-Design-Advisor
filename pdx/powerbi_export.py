@@ -1,57 +1,101 @@
-"""A public CSV of every Participedia case, for the Power BI dashboard to refresh from on its own.
+"""A public CSV of every published Participedia case, for the Power BI dashboard to refresh from on its own.
 
 Written by each run (the monthly cloud refresh included) to docs/data/participedia_cases.csv, which GitHub Pages
 serves at a fixed web address. Power BI's Web connector reads it with no gateway, so a scheduled refresh in the
 Power BI service keeps the published dashboard current.
 
-One row per case on Participedia's public index. Cases in the capstone snapshot carry what the advisor already
-publishes about them (start year, methods, documented impact); cases added since carry the same fields from their
-own public records, plus the advisor's model score. Country indicators are the public per-country values in
-pdx/live_context.json. Nothing here comes from the private capstone file beyond what the advisor page shows.
+Built only from public data: each case's own record on participedia.net (fetched once, then again only when the case
+is updated), plus the public per-country indicators in pdx/live_context.json. The column names match the dashboard's
+original table, so pointing that table at this file keeps every visual working:
+    id, title, description, country, city, start_date, end_date, method_types_1, method_types_2,
+    recruitment_method, gini_index, freedom_score, internet_pct
+and adds latitude, longitude, completeness, posted_date, updated_date, documented_impact, source, model_score, case_url.
 """
 import json
+import time
 
 import pandas as pd
 
 from . import config as C
 from . import features as FT
+from . import live
 
 OUT = C.ROOT / "docs" / "data" / "participedia_cases.csv"
+RECORDS = C.RAW / "case_records.jsonl"
+METHOD = FT.MULTI["method_types"][1]
+RECRUIT = FT.SINGLE["recruitment_method"][1] if "recruitment_method" in FT.SINGLE else {}
 
 
-def export(payload):
+def _records(idx, limit=None, pause=0.6):
+    """Every case's public record, cached; fetches only cases that are new or updated since the last fetch."""
+    have = {}
+    if RECORDS.exists():
+        for line in RECORDS.open(encoding="utf-8"):
+            a = json.loads(line)
+            have[int(a["id"])] = a
+    new_cases = C.RAW / "live_new_cases.jsonl"                     # records the advisor already fetched
+    if new_cases.exists():
+        for line in new_cases.open(encoding="utf-8"):
+            a = json.loads(line)
+            have.setdefault(int(a["id"]), a)
+    todo = [int(r.id) for r in idx.itertuples()
+            if int(r.id) not in have or str(have[int(r.id)].get("updated_date", ""))[:19] != str(r.updated_date)[:19]]
+    if limit is not None:
+        todo = todo[:limit]
+    print(f"case records: {len(have):,} cached, {len(todo):,} to fetch")
+    for i, cid in enumerate(todo):
+        try:
+            have[cid] = live.get(f"https://participedia.net/case/{cid}?returns=json")["article"]
+        except Exception as e:
+            print("skip", cid, e)
+        if i % 100 == 0:
+            print(f"  {i}/{len(todo)}")
+        time.sleep(pause)
+    with RECORDS.open("w", encoding="utf-8") as f:
+        for a in have.values():
+            f.write(json.dumps(a, ensure_ascii=False) + "\n")
+    return have
+
+
+def _date(v):
+    return str(v)[:10] if v not in (None, "", "null") else ""
+
+
+def export(payload, limit=None):
     idx = pd.read_csv(C.RAW / "live_index.csv")
     idx = idx[idx.type == "case"].copy()
+    rec = _records(idx, limit=limit)
     ctx = json.loads((C.ROOT / "pdx" / "live_context.json").read_text(encoding="utf-8"))["countries"]
-    feats = payload["features"]
-    method_of = {j: f["label"] for j, f in enumerate(feats) if f["name"].startswith("method_types=")}
-
-    snap = {}
-    for c in payload["cases"]:
-        if c.get("id") is not None:
-            snap[int(c["id"])] = {"start_year": c.get("y"), "methods": "; ".join(method_of[j] for j in c["f"] if j in method_of),
-                                  "documented_impact": c.get("i"), "model_score": None, "in_capstone": "Capstone dataset"}
-    new = {int(r["id"]): {"start_year": r.get("y"), "methods": "; ".join(r.get("m") or []), "documented_impact": r.get("imp"),
-                          "model_score": r.get("p"), "in_capstone": "Added since"} for r in payload["live"] if r.get("id") is not None}
+    snapshot_ids = {int(c["id"]) for c in payload["cases"] if c.get("id") is not None}
+    score = {int(r["id"]): r.get("p") for r in payload["live"] if r.get("id") is not None}
 
     rows = []
     for r in idx.itertuples():
         cid = int(r.id)
-        extra = snap.get(cid) or new.get(cid) or {"start_year": None, "methods": "", "documented_impact": None,
-                                                    "model_score": None, "in_capstone": "Not scored (unpublished or renamed)"}
-        g = ctx.get(r.country) if isinstance(r.country, str) else None
-        rows.append({"case_id": cid, "title": r.title, "country": r.country if isinstance(r.country, str) else "",
-                     "latitude": r.latitude, "longitude": r.longitude, "completeness": r.completeness if isinstance(r.completeness, str) else "",
-                     "posted_date": str(r.post_date)[:10] if pd.notna(r.post_date) else "",
-                     "updated_date": str(r.updated_date)[:10] if pd.notna(r.updated_date) else "",
-                     "source": extra["in_capstone"], "start_year": extra["start_year"], "methods": extra["methods"],
-                     "documented_impact": extra["documented_impact"], "model_score": extra["model_score"],
-                     "gini": g[0] if g else None, "freedom_score": g[1] if g else None, "internet_pct": g[2] if g else None,
-                     "case_url": f"https://participedia.net/case/{cid}"})
-    df = pd.DataFrame(rows).sort_values("case_id")
-    df["start_year"] = pd.to_numeric(df["start_year"], errors="coerce").astype("Int64")
-    df["documented_impact"] = pd.to_numeric(df["documented_impact"], errors="coerce").astype("Int64")
+        a = rec.get(cid)
+        if a is None or a.get("published") in (False, "false") or a.get("hidden") in (True, "true"):
+            continue
+        country = a.get("country") or (r.country if isinstance(r.country, str) else "")
+        g = ctx.get(country)
+        methods = [METHOD.get(m, m) for m in (a.get("method_types") or []) if isinstance(m, str)]
+        ie = a.get("impact_evidence")
+        rows.append({
+            "id": cid, "title": a.get("title") or r.title, "description": (a.get("description") or "").strip(),
+            "country": country, "city": a.get("city") or "",
+            "start_date": _date(a.get("start_date")), "end_date": _date(a.get("end_date")),
+            "method_types_1": methods[0] if methods else "", "method_types_2": methods[1] if len(methods) > 1 else "",
+            "recruitment_method": RECRUIT.get(a.get("recruitment_method"), a.get("recruitment_method") or ""),
+            "gini_index": g[0] if g else None, "freedom_score": g[1] if g else None, "internet_pct": g[2] if g else None,
+            "latitude": a.get("latitude") if a.get("latitude") not in ("", None) else r.latitude,
+            "longitude": a.get("longitude") if a.get("longitude") not in ("", None) else r.longitude,
+            "completeness": a.get("completeness") or (r.completeness if isinstance(r.completeness, str) else ""),
+            "posted_date": _date(a.get("post_date") or r.post_date), "updated_date": _date(a.get("updated_date") or r.updated_date),
+            "documented_impact": 1 if ie in (True, "yes", "true", "True") else (0 if ie in (False, "no", "false", "False") else None),
+            "source": "Capstone dataset" if cid in snapshot_ids else "Added since",
+            "model_score": score.get(cid), "case_url": f"https://participedia.net/case/{cid}"})
+    df = pd.DataFrame(rows).sort_values("id")
+    df["documented_impact"] = df["documented_impact"].astype("Int64")
     OUT.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(OUT, index=False, encoding="utf-8")
-    print(f"Power BI data: {len(df):,} cases -> {OUT}")
+    print(f"Power BI data: {len(df):,} published cases -> {OUT}")
     return df
