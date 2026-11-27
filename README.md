@@ -5,7 +5,7 @@
 The companion [Participedia Global Research Interactive Dashboard](#companion-power-bi-dashboard) (Power BI, included in this repository) shows *where* participatory processes happen and in what national context. This microproduct turns the same archive into decisions. It learns from 2,260 Participedia cases in 124 countries (the ALY6980 capstone dataset), adds every case published since then on [participedia.net](https://participedia.net), refreshed automatically each month, and gives organizers, funders and public bodies:
 
 [![Live advisor](https://img.shields.io/badge/Open_the_advisor-2B1B3D?style=for-the-badge)](https://zosmano.github.io/Participedia-Design-Advisor/docs/)
-[![Power BI](https://img.shields.io/badge/Power_BI-Live_Dashboard-F2C811?style=for-the-badge&logo=powerbi&logoColor=black)](https://app.powerbi.com/view?r=eyJrIjoiZmFlMDhlMTEtOWE3NC00ZTRhLWFjNjEtZGY2ZGRiOGVkMGVlIiwidCI6ImM3ZTc5YjlkLWVjZTktNDEzMy04NzQzLWI2Y2FkMjZjNTc0ZiIsImMiOjEwfQ%3D%3D)
+[![Power BI](https://img.shields.io/badge/Power_BI-Live_Dashboard-F2C811?style=for-the-badge&logo=powerbi&logoColor=black)](https://zosmano.github.io/governance-dashboard/)
 [![Python](https://img.shields.io/badge/Python_pipeline-1D7A5F?style=for-the-badge&logo=python&logoColor=white)](#run-it)
 [![Data sources](https://img.shields.io/badge/Data_sources-B8862B?style=for-the-badge)](#data-sources)
 
@@ -43,7 +43,7 @@ The interactive advisor runs in the browser ([live version](https://zosmano.gith
 
 The **Participedia Global Research Interactive Dashboard** is the descriptive side of this project: where the 2,260 cases happen, in what national context, and by which methods. The advisor builds on it to say which designs work.
 
-[![Power BI](https://img.shields.io/badge/Power_BI-Open_the_live_dashboard-F2C811?style=for-the-badge&logo=powerbi&logoColor=black)](https://app.powerbi.com/view?r=eyJrIjoiZmFlMDhlMTEtOWE3NC00ZTRhLWFjNjEtZGY2ZGRiOGVkMGVlIiwidCI6ImM3ZTc5YjlkLWVjZTktNDEzMy04NzQzLWI2Y2FkMjZjNTc0ZiIsImMiOjEwfQ%3D%3D)
+[![Power BI](https://img.shields.io/badge/Power_BI-Open_the_live_dashboard-F2C811?style=for-the-badge&logo=powerbi&logoColor=black)](https://zosmano.github.io/governance-dashboard/)
 
 | Page | What it shows |
 |---|---|
