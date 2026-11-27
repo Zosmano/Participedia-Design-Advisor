@@ -168,6 +168,10 @@ def new_cases(p):
 def build(only_live=False):
     """All five README charts; only_live=True redraws just the one the monthly refresh changes (new cases),
     leaving the capstone charts exactly as the last full run drew them."""
+    from matplotlib import font_manager
+    if not any("Segoe UI" in f.name for f in font_manager.fontManager.ttflist):
+        print("figures skipped: the charts' Windows fonts are not installed here (redraw them locally)")
+        return
     FIG.mkdir(parents=True, exist_ok=True)
     p = json.loads((C.OUT / "payload.json").read_text())
     for f in ((new_cases,) if only_live else (effects, evidence, context, fit, new_cases)):
