@@ -57,8 +57,19 @@ def _records(idx, limit=None, pause=0.6):
     return have
 
 
+# Newer entries give the country in the contributor's language; use the English names the archive mostly uses
+# (and pdx/live_context.json uses), so each country is counted once and gets its indicators.
+COUNTRY = {"Argentinien": "Argentina", "Belgique": "Belgium", "Bolivien": "Bolivia", "Brasil": "Brazil",
+           "Czech Republic": "Czechia", "Tchéquia": "Czechia", "Deutschland": "Germany", "Germania": "Germany",
+           "España": "Spain", "Italia": "Italy", "Mexiko": "Mexico", "Nederland": "Netherlands", "Polska": "Poland",
+           "Regno Unito": "United Kingdom", "Republic of North Macedonia": "North Macedonia", "Suisse": "Switzerland",
+           "Türkiye": "Turkey", "中国": "China", "Myanmar (Burma)": "Myanmar"}
+
+
 def _date(v):
-    return str(v)[:10] if v not in (None, "", "null") else ""
+    if v is None or (isinstance(v, float) and v != v) or str(v).strip().lower() in ("", "null", "nan", "none", "nat"):
+        return ""
+    return str(v)[:10]
 
 
 def export(payload, limit=None):
@@ -75,7 +86,8 @@ def export(payload, limit=None):
         a = rec.get(cid)
         if a is None or a.get("published") in (False, "false") or a.get("hidden") in (True, "true"):
             continue
-        country = a.get("country") or (r.country if isinstance(r.country, str) else "")
+        country = (a.get("country") or (r.country if isinstance(r.country, str) else "")).strip()
+        country = COUNTRY.get(country, country)
         g = ctx.get(country)
         methods = [METHOD.get(m, m) for m in (a.get("method_types") or []) if isinstance(m, str)]
         ie = a.get("impact_evidence")
