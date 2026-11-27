@@ -28,13 +28,17 @@ def build(payload):
 
 if __name__ == "__main__":
     if "--refresh" in sys.argv:
-        from pdx import figures, refresh
-        build(refresh.run())
+        from pdx import figures, powerbi_export, refresh
+        payload = refresh.run()
+        build(payload)
+        powerbi_export.export(payload)
         figures.build(only_live=True)
         sys.exit(0)
     if "--live" in sys.argv:
         live.index()
         live.fetch_new(pd.read_csv(C.CAPSTONE, usecols=["title"]).title.dropna())
-    build(analysis.run())
-    from pdx import figures
+    payload = analysis.run()
+    build(payload)
+    from pdx import figures, powerbi_export
+    powerbi_export.export(payload)
     figures.build()
